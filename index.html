@@ -126,20 +126,24 @@
                     </div>
                 </div>
 
-                <!-- Event Details -->
+                <!-- Event Details & Limits -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
-                        <i data-lucide="calendar-clock" class="w-5 h-5"></i> Event Details
+                        <i data-lucide="calendar-clock" class="w-5 h-5"></i> Event Details & Limits
                     </h3>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Wedding Date</label>
                             <input type="date" id="setup-date" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Time (e.g. 09:45 AM Onwards)</label>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Time (e.g. 09:45 AM)</label>
                             <input type="text" id="setup-time" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1 text-amber-500">Max Visitors (0 = Unlimited)</label>
+                            <input type="number" id="setup-max-views" min="0" value="0" required class="w-full bg-stone-950 border border-amber-600/50 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white" title="The link will lock after this many people open it">
                         </div>
                     </div>
 
@@ -198,6 +202,19 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         LIMIT REACHED SCREEN (Guest View Only)
+         ========================================== -->
+    <div id="limit-screen" class="hidden relative z-50 min-h-screen bg-stone-950 flex flex-col items-center justify-center py-10 px-4">
+        <div class="max-w-md w-full bg-stone-900 border border-stone-800 rounded-3xl p-8 shadow-2xl text-center">
+            <div class="w-16 h-16 bg-rose-600/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/30">
+                <i data-lucide="lock" class="w-8 h-8"></i>
+            </div>
+            <h1 class="font-serif-luxury text-3xl text-white mb-2">Invitation Closed</h1>
+            <p class="text-sm text-stone-400">We're sorry, but this invitation link has reached its maximum allowed number of views and is no longer accessible.</p>
         </div>
     </div>
 
@@ -525,7 +542,8 @@
             groomParents: "", brideParents: "",
             date: "", timeText: "",
             venue: "", greeting: "",
-            style: "kandyan", color: "royalGold", music: "harp"
+            style: "kandyan", color: "royalGold", music: "harp",
+            maxViews: 0, uid: ""
         };
         
         let currentAttendanceChoice = 'yes'; // RSVP State
@@ -562,47 +580,82 @@
             params.set('style', c.style);
             params.set('color', c.color);
             params.set('music', c.music);
+            params.set('max', c.maxViews);
+            params.set('uid', c.uid); // Unique identifier for cloud hit counter
             
             const baseUrl = window.location.href.split('?')[0];
             return `${baseUrl}?${params.toString()}`;
         }
 
+        // --- VISITOR LIMIT CHECK (GUEST MODE) ---
+        async function checkVisitorLimit() {
+            if (!config.uid || config.maxViews <= 0) return true; // Unlimited
+
+            // 1. Check if this device has already consumed a view to prevent refresh-stealing
+            const accessKey = 'ev_access_' + config.uid;
+            if (localStorage.getItem(accessKey)) return true; 
+
+            // 2. Fetch remote counter
+            try {
+                const res = await fetch(`https://api.counterapi.dev/v1/eternalvows/${config.uid}/up`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.count > config.maxViews) {
+                        return false; // Limit exceeded
+                    }
+                }
+            } catch (e) {
+                // Failsafe: if the public free API is blocked or offline, we allow access to not ruin the wedding!
+                console.warn("Counter API failed, allowing access gracefully.");
+            }
+            
+            // Mark device as registered for this invite
+            localStorage.setItem(accessKey, 'true');
+            return true;
+        }
+
         // --- INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
             const urlParams = new URLSearchParams(window.location.search);
             const isGuest = urlParams.get('guest') === '1';
 
             if (isGuest) {
-                // Support legacy Base64 cfg for older links, but rely on new readable parameters
-                if (urlParams.get('cfg')) {
-                    try { 
-                        const loadedConfig = JSON.parse(decodeURIComponent(atob(urlParams.get('cfg'))));
-                        if (loadedConfig) config = loadedConfig;
-                    } catch(e) {}
-                } else {
-                    config.groom = urlParams.get('groom') || "";
-                    config.bride = urlParams.get('bride') || "";
-                    config.groomParents = urlParams.get('gParents') || "";
-                    config.brideParents = urlParams.get('bParents') || "";
-                    config.date = urlParams.get('date') || "";
-                    config.timeText = urlParams.get('time') || "";
-                    config.venue = urlParams.get('venue') || "";
-                    config.greeting = urlParams.get('msg') || "";
-                    config.style = urlParams.get('style') || "kandyan";
-                    config.color = urlParams.get('color') || "royalGold";
-                    config.music = urlParams.get('music') || "harp";
+                // Immediately hide setup
+                document.getElementById('setup-screen').classList.add('hidden');
+
+                // Read parameters
+                config.groom = urlParams.get('groom') || "";
+                config.bride = urlParams.get('bride') || "";
+                config.groomParents = urlParams.get('gParents') || "";
+                config.brideParents = urlParams.get('bParents') || "";
+                config.date = urlParams.get('date') || "";
+                config.timeText = urlParams.get('time') || "";
+                config.venue = urlParams.get('venue') || "";
+                config.greeting = urlParams.get('msg') || "";
+                config.style = urlParams.get('style') || "kandyan";
+                config.color = urlParams.get('color') || "royalGold";
+                config.music = urlParams.get('music') || "harp";
+                config.maxViews = parseInt(urlParams.get('max')) || 0;
+                config.uid = urlParams.get('uid') || "";
+
+                // Wait and verify if guest is allowed inside limit
+                const allowed = await checkVisitorLimit();
+                
+                if (!allowed) {
+                    document.getElementById('limit-screen').classList.remove('hidden');
+                    return; // Stop execution
                 }
                 
-                // Hide Setup, Show Envelope directly
-                document.getElementById('setup-screen').classList.add('hidden');
+                // Allowed! Show Envelope
                 document.getElementById('envelope-screen').classList.remove('hidden');
                 document.getElementById('floating-controls').classList.remove('hidden');
                 applyConfigToUI();
             } else {
-                // Set defaults for the form to make testing easier
+                // Admin Mode Default
                 document.getElementById('setup-date').value = new Date().toISOString().split('T')[0];
             }
+            
             resizeCanvas();
             createParticles();
             animateParticles();
@@ -625,6 +678,10 @@
             config.style = document.getElementById('setup-style').value;
             config.color = document.getElementById('setup-color').value;
             config.music = document.getElementById('setup-music').value;
+            config.maxViews = parseInt(document.getElementById('setup-max-views').value) || 0;
+            
+            // Generate a random unique ID for the hit counter
+            config.uid = Math.random().toString(36).substring(2, 10);
 
             applyConfigToUI();
 
