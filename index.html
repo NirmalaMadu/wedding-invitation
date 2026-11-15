@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Vows — Interactive Wedding Invitation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-primary: #FAF6F0;
+            --bg-card: #FFFFFF;
+            --text-primary: #2C221E;
+            --text-secondary: #6E5A4F;
+            --accent-main: #C59B27;
+            --accent-soft: #F3E8C8;
+            --border-ornate: #E2D1A7;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #141210;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .font-serif-luxury { font-family: 'Cormorant Garamond', serif; }
+        .font-script { font-family: 'Great Vibes', cursive; }
+
+        /* Multi-part Character Animations */
+        @keyframes groomBreathe { 0%, 100% { transform: translateY(0px) scaleY(1); } 50% { transform: translateY(-4px) scaleY(1.015); } }
+        @keyframes groomHeadTilt { 0%, 100% { transform: rotate(-1.8deg) translateY(0px); } 50% { transform: rotate(2.2deg) translateY(-2px); } }
+        @keyframes groomArmWave { 0%, 100% { transform: rotate(0deg); } 40% { transform: rotate(-14deg) translateY(-2px); } 70% { transform: rotate(4deg); } }
+        @keyframes brideSway { 0%, 100% { transform: translateY(0px) rotate(1.4deg); } 50% { transform: translateY(-6px) rotate(-1.6deg); } }
+        @keyframes brideHeadNod { 0%, 100% { transform: rotate(2deg) translateY(0px); } 50% { transform: rotate(-2.5deg) translateY(-2px); } }
+        @keyframes brideBouquetMove { 0%, 100% { transform: rotate(0deg) translateY(0px); } 50% { transform: rotate(9deg) translateY(-4px); } }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.8); opacity: 0; } 30% { opacity: 0.95; } 100% { transform: translateY(-75px) scale(1.25); opacity: 0; } }
+        @keyframes blinkEyes { 0%, 46%, 50%, 96%, 100% { transform: scaleY(1); } 48%, 98% { transform: scaleY(0.08); } }
+        @keyframes pulseSeal { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(197, 155, 39, 0.5); } 50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(197, 155, 39, 0); } }
+
+        .groom-body-anim { animation: groomBreathe 3.2s ease-in-out infinite; transform-origin: bottom center; transform-box: fill-box; }
+        .groom-head-anim { animation: groomHeadTilt 4.1s ease-in-out infinite; transform-origin: bottom center; transform-box: fill-box; }
+        .groom-arm-anim { animation: groomArmWave 3.6s ease-in-out infinite; transform-origin: top left; transform-box: fill-box; }
+        .groom-eye-blink { animation: blinkEyes 4.8s infinite 0.4s; transform-origin: center; transform-box: fill-box; }
+        .bride-body-anim { animation: brideSway 2.6s ease-in-out infinite 0.7s; transform-origin: bottom center; transform-box: fill-box; }
+        .bride-head-anim { animation: brideHeadNod 3.5s ease-in-out infinite 1.1s; transform-origin: bottom center; transform-box: fill-box; }
+        .bride-arm-anim { animation: brideBouquetMove 2.9s ease-in-out infinite 0.3s; transform-origin: top right; transform-box: fill-box; }
+        .bride-eye-blink { animation: blinkEyes 5.3s infinite 1.9s; transform-origin: center; transform-box: fill-box; }
+
+        @keyframes groomSoloBow { 0%, 100% { transform: translateY(0) rotate(0deg) scale(1); } 30% { transform: translateY(-12px) rotate(-6deg) scale(1.05); } 60% { transform: translateY(4px) rotate(8deg) scale(1.02); } }
+        @keyframes brideSoloCurtsy { 0%, 100% { transform: translateY(0) rotate(0deg) scale(1); } 35% { transform: translateY(8px) rotate(-4deg) scale(0.98); } 70% { transform: translateY(-14px) rotate(5deg) scale(1.06); } }
+        @keyframes celebrateJump { 0%, 100% { transform: translateY(0) scale(1); } 25% { transform: translateY(-18px) scale(1.05) rotate(-3deg); } 50% { transform: translateY(0) scale(1); } 75% { transform: translateY(-12px) scale(1.03) rotate(3deg); } }
+        @keyframes sympatheticWave { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg) translateY(-4px); } 75% { transform: rotate(5deg) translateY(-4px); } }
+
+        .groom-solo-active { animation: groomSoloBow 0.95s ease-in-out 1 !important; }
+        .bride-solo-active { animation: brideSoloCurtsy 0.95s ease-in-out 1 !important; }
+        .couple-celebrate { animation: celebrateJump 0.9s ease-in-out 2 !important; }
+        .couple-sympathy { animation: sympatheticWave 0.9s ease-in-out 2 !important; }
+        .floating-heart { animation: floatUp 3.5s ease-in infinite; }
+        .wax-seal-btn { animation: pulseSeal 2.5s infinite; }
+
+        .envelope-overlay { transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), transform 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
+        .envelope-overlay.opened { opacity: 0; transform: scale(1.12) translateY(-40px); pointer-events: none; }
+        .ornate-frame { border: 1px solid var(--border-ornate); position: relative; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative selection:bg-amber-200 selection:text-amber-900">
+
+    <!-- Ambient Background -->
+    <div id="ambient-bg" class="fixed inset-0 z-0 opacity-35 transition-colors duration-700"
+         style="background: radial-gradient(circle at 50% 20%, #C59B27 0%, #3a2a1d 45%, #0f0d0c 100%);"></div>
+    <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-20"></canvas>
+
+    <!-- ==========================================
+         1. CREATOR SETUP / DETAIL COLLECTION (Shown first)
+         ========================================== -->
+    <div id="setup-screen" class="relative z-50 min-h-screen bg-stone-950 flex flex-col items-center py-10 px-4">
+        <div class="max-w-3xl w-full bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-10 shadow-2xl text-stone-200">
+            
+            <div class="text-center mb-10">
+                <div class="w-16 h-16 bg-amber-600/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
+                    <i data-lucide="wand-2" class="w-8 h-8"></i>
+                </div>
+                <h1 class="font-serif-luxury text-4xl text-white mb-2">Create Your Wedding Invitation</h1>
+                <p class="text-sm text-stone-400">Fill in your details below. Once generated, you'll receive a secure link to send to your guests.</p>
+            </div>
+
+            <form id="creator-setup-form" class="space-y-8" onsubmit="handleCreateInvitation(event)">
+                
+                <!-- Couple & Parents -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
+                        <i data-lucide="users" class="w-5 h-5"></i> Names & Families
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Groom's Name</label>
+                            <input type="text" id="setup-groom" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Kasun">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Bride's Name</label>
+                            <input type="text" id="setup-bride" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Amaya">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Groom's Parents (Father & Mother)</label>
+                            <input type="text" id="setup-groom-parents" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Mr. & Mrs. Perera">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Bride's Parents (Father & Mother)</label>
+                            <input type="text" id="setup-bride-parents" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Mr. & Mrs. Silva">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Details -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
+                        <i data-lucide="calendar-clock" class="w-5 h-5"></i> Event Details
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Wedding Date</label>
+                            <input type="date" id="setup-date" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Time (e.g. 09:45 AM Onwards)</label>
+                            <input type="text" id="setup-time" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Venue Name & Address</label>
+                        <input type="text" id="setup-venue" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. The Grand Ballroom, Shangri-La, Colombo 02">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Greeting / Display Message</label>
+                        <textarea id="setup-greeting" required rows="2" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="Invite you to share in the joy as they exchange vows and begin their new life together."></textarea>
+                    </div>
+                </div>
+
+                <!-- Theme & Styling -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
+                        <i data-lucide="palette" class="w-5 h-5"></i> Theme & Design
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Wedding Style</label>
+                            <select id="setup-style" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white">
+                                <option value="kandyan">1. Kandyan Traditional</option>
+                                <option value="western">2. Western Classic</option>
+                                <option value="tamil_hindu">3. Tamil Hindu</option>
+                                <option value="muslim">4. Muslim Nikkah</option>
+                                <option value="low_country">5. Low Country Traditional</option>
+                                <option value="modern_luxury">6. Modern Luxury</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Color Theme</label>
+                            <select id="setup-color" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white">
+                                <option value="royalGold">Royal Gold & Ivory</option>
+                                <option value="sageBlush">Sage Green & Pearl</option>
+                                <option value="burgundy">Burgundy & Rose</option>
+                                <option value="midnight">Midnight & Gold</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Background Music</label>
+                            <select id="setup-music" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white">
+                                <option value="harp">Gentle Harp Melody</option>
+                                <option value="flute">Traditional Flute Tune</option>
+                                <option value="piano">Romantic Piano</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-lg shadow-xl shadow-amber-600/20 transition flex items-center justify-center gap-2">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i> Create The Invitation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         2. ADMIN SHARE BAR (Shown after creation)
+         ========================================== -->
+    <div id="admin-share-bar" class="hidden fixed top-0 left-0 right-0 z-[60] bg-emerald-950 border-b border-emerald-800 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
+        <div class="flex items-center gap-2 text-emerald-400">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            <span class="text-sm font-semibold">Invitation Created Successfully!</span>
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <input type="text" id="shareable-link-input" readonly class="flex-1 sm:w-96 bg-emerald-900/50 border border-emerald-700 rounded-lg px-3 py-1.5 text-xs text-emerald-100 font-mono outline-none">
+            <button onclick="copyGeneratedLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 whitespace-nowrap">
+                <i data-lucide="copy" class="w-4 h-4"></i> Copy Guest Link
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         3. AUDIO & REPLAY TOGGLES (Floating)
+         ========================================== -->
+    <div id="floating-controls" class="hidden fixed top-20 sm:top-6 left-0 right-0 z-40 px-4 pointer-events-none flex justify-between items-center max-w-5xl mx-auto w-full">
+        <div class="pointer-events-auto">
+            <button onclick="resetEnvelope()" class="bg-black/60 hover:bg-black/80 text-white/90 backdrop-blur-md px-3.5 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 border border-white/15 shadow-lg transition">
+                <i data-lucide="mail" class="w-3.5 h-3.5 text-amber-400"></i> <span class="hidden sm:inline">Replay Envelope</span>
+            </button>
+        </div>
+        <div class="pointer-events-auto">
+            <button id="audio-toggle-btn" onclick="toggleAudio()" class="bg-black/60 hover:bg-black/80 text-white/90 backdrop-blur-md px-3.5 py-2 rounded-full text-xs font-medium flex items-center gap-2 border border-white/15 shadow-lg transition">
+                <i id="audio-icon" data-lucide="volume-x" class="w-3.5 h-3.5 text-amber-400"></i> <span id="audio-label">Music Off</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         4. WAX-SEALED ENVELOPE OVERLAY
+         ========================================== -->
+    <div id="envelope-screen" class="hidden envelope-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-xl">
+        <div class="relative w-full max-w-md rounded-3xl p-8 sm:p-10 text-center shadow-2xl border transition-all duration-500 overflow-hidden"
+             style="background-color: var(--bg-primary); border-color: var(--border-ornate); color: var(--text-primary);">
+            
+            <svg class="absolute top-0 left-0 w-full h-44 pointer-events-none opacity-25" viewBox="0 0 400 160" preserveAspectRatio="none">
+                <path d="M0,0 L200,145 L400,0" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M0,8 L200,153 L400,8" fill="none" stroke="currentColor" stroke-width="0.7" stroke-dasharray="4 4"/>
+            </svg>
+
+            <div class="relative z-10 mt-6 mb-4">
+                <p class="uppercase tracking-[0.3em] text-[11px] font-semibold opacity-75 mb-3" style="color: var(--text-secondary);">
+                    Cordially Invited To The Wedding Of
+                </p>
+                <h1 id="env-couple-names" class="font-script text-4xl sm:text-5xl py-2" style="color: var(--accent-main);">
+                    Groom & Bride
+                </h1>
+                <p id="env-date" class="font-serif-luxury italic text-lg mt-1 opacity-85">
+                     Date • Venue
+                </p>
+            </div>
+
+            <div class="my-8 flex flex-col items-center justify-center">
+                <button onclick="openInvitation()"
+                    class="wax-seal-btn relative w-28 h-28 rounded-full flex flex-col items-center justify-center text-white shadow-2xl cursor-pointer transition-transform active:scale-95 group"
+                    style="background: radial-gradient(circle at 30% 30%, #d4af37, #996515 70%, #5c3a08 100%); border: 3px double rgba(255,255,255,0.45);">
+                    <div class="absolute inset-2 rounded-full border border-white/30 pointer-events-none"></div>
+                    <span id="env-monogram" class="font-serif-luxury font-bold text-2xl tracking-wider drop-shadow">G&B</span>
+                    <span class="text-[9px] uppercase tracking-widest mt-1 opacity-90 font-semibold">Tap to Open</span>
+                </button>
+            </div>
+            <p class="text-xs opacity-70 max-w-xs mx-auto leading-relaxed" style="color: var(--text-secondary);">
+                Tap the wax seal to unveil the animated invitation & melody
+            </p>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         5. MAIN INVITATION CARD CONTAINER
+         ========================================== -->
+    <main id="invitation-wrapper" class="hidden relative z-10 w-full max-w-xl mx-auto my-24 sm:my-28 px-3 sm:px-0 transition-all duration-500">
+        <div id="invitation-card" class="rounded-[32px] shadow-2xl overflow-hidden border transition-colors duration-500"
+             style="background-color: var(--bg-primary); border-color: var(--border-ornate); color: var(--text-primary);">
+
+            <!-- Top Ornamental Arch Header -->
+            <div class="relative pt-12 pb-6 px-6 sm:px-12 text-center overflow-hidden">
+                <svg class="w-72 h-72 mx-auto absolute -top-24 left-1/2 -translate-x-1/2 opacity-10 pointer-events-none" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+                    <circle cx="100" cy="100" r="75" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M100,10 C130,50 150,70 190,100 C150,130 130,150 100,190 C70,150 50,130 10,100 C50,70 70,50 100,10 Z" fill="none" stroke="currentColor" stroke-width="1"/>
+                </svg>
+
+                <!-- PARENTS NAMES SECTION -->
+                <div class="mb-4 text-xs font-serif-luxury italic opacity-85 leading-loose" style="color: var(--text-secondary);">
+                    Son of <span id="card-groom-parents" class="font-semibold not-italic">Mr. & Mrs. Parent</span><br>
+                    <span class="text-[10px] uppercase tracking-widest opacity-60">and</span><br>
+                    Daughter of <span id="card-bride-parents" class="font-semibold not-italic">Mr. & Mrs. Parent</span>
+                </div>
+
+                <p class="uppercase tracking-[0.25em] text-xs font-semibold mb-2 mt-4" style="color: var(--text-secondary);">
+                    Joyfully Invite You To Their Wedding
+                </p>
+
+                <h1 class="font-script text-5xl sm:text-6xl leading-tight py-2 transition-colors" style="color: var(--accent-main);">
+                    <span id="card-groom-name">Groom</span>
+                    <span class="text-3xl sm:text-4xl mx-1 opacity-80">&amp;</span>
+                    <span id="card-bride-name">Bride</span>
+                </h1>
+
+                <p id="card-welcome-msg" class="font-serif-luxury italic text-lg sm:text-xl max-w-md mx-auto mt-2 leading-relaxed" style="color: var(--text-secondary);">
+                    Invite you to share in the joy as they exchange vows and begin their new life together.
+                </p>
+
+                <!-- SIDE-BY-SIDE ANIMATED STAGE -->
+                <div class="relative my-8 mx-auto max-w-lg rounded-3xl p-4 sm:p-6 ornate-frame transition-colors duration-500"
+                     style="background-color: var(--bg-card);">
+                    
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
+                        <span id="couple-reaction-status" class="text-[11px] font-medium px-3 py-1 rounded-full"
+                              style="background-color: var(--accent-soft); color: var(--text-primary);">
+                            ✨ Tap characters to interact!
+                        </span>
+                        <button type="button" onclick="triggerCharacterReaction('joy')" class="px-3 py-1 rounded-full text-[11px] font-semibold text-white shadow-sm flex items-center gap-1 transition active:scale-95" style="background-color: var(--accent-main);">
+                            <i data-lucide="sparkles" class="w-3 h-3"></i> Celebrate
+                        </button>
+                    </div>
+
+                    <div id="couple-reaction-layer" class="absolute inset-0 pointer-events-none overflow-hidden z-20"></div>
+
+                    <!-- Characters -->
+                    <div class="relative grid grid-cols-2 gap-3 sm:gap-6 items-end pt-4 pb-2 px-2">
+                        <svg class="absolute inset-x-4 top-2 bottom-6 w-[calc(100%-2rem)] h-[calc(100%-2rem)] pointer-events-none opacity-25 z-0" viewBox="0 0 400 260" preserveAspectRatio="none">
+                            <path d="M 20,250 A 180,190 0 0,1 380,250" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="6 4" style="color: var(--accent-main);"/>
+                        </svg>
+
+                        <div class="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                            <span class="floating-heart text-xl sm:text-2xl select-none">💞</span>
+                        </div>
+
+                        <!-- Groom -->
+                        <div id="groom-stage-card" onclick="triggerGroomSolo(event)" class="relative z-10 flex flex-col items-center justify-end p-2 rounded-2xl cursor-pointer group hover:bg-black/[0.02]">
+                            <div id="groom-bubble" class="opacity-0 -translate-y-1 transition-all duration-300 mb-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold shadow-sm whitespace-nowrap" style="background-color: var(--accent-main); color: #fff;">
+                                Welcome! 🙏
+                            </div>
+                            <div id="groom-svg-box" class="w-full h-56 sm:h-64 flex items-end justify-center"></div>
+                            <span id="stage-groom-label" class="mt-1 text-xs font-serif-luxury font-bold tracking-wider uppercase opacity-80 group-hover:opacity-100">Groom</span>
+                        </div>
+
+                        <!-- Bride -->
+                        <div id="bride-stage-card" onclick="triggerBrideSolo(event)" class="relative z-10 flex flex-col items-center justify-end p-2 rounded-2xl cursor-pointer group hover:bg-black/[0.02]">
+                            <div id="bride-bubble" class="opacity-0 -translate-y-1 transition-all duration-300 mb-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold shadow-sm whitespace-nowrap" style="background-color: var(--accent-main); color: #fff;">
+                                So happy! 💐
+                            </div>
+                            <div id="bride-svg-box" class="w-full h-56 sm:h-64 flex items-end justify-center"></div>
+                            <span id="stage-bride-label" class="mt-1 text-xs font-serif-luxury font-bold tracking-wider uppercase opacity-80 group-hover:opacity-100">Bride</span>
+                        </div>
+                    </div>
+                    <p id="attire-caption" class="text-[11px] uppercase tracking-widest opacity-65 mt-2 font-medium text-center" style="color: var(--text-secondary);">
+                        Wedding Attire
+                    </p>
+                </div>
+
+                <!-- DETAILS & COUNTDOWN -->
+                <div class="mt-8 space-y-6">
+                    <div class="py-5 px-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8" style="background-color: var(--accent-soft); border-color: var(--border-ornate);">
+                        <div class="text-center">
+                            <span class="block text-xs uppercase tracking-widest opacity-70" style="color: var(--text-secondary);">Date</span>
+                            <span id="display-date-formatted" class="font-serif-luxury font-bold text-2xl sm:text-3xl" style="color: var(--text-primary);">Date</span>
+                        </div>
+                        <div class="hidden sm:block h-10 w-px" style="background-color: var(--border-ornate);"></div>
+                        <div class="text-center">
+                            <span class="block text-xs uppercase tracking-widest opacity-70" style="color: var(--text-secondary);">Time</span>
+                            <span id="display-time-formatted" class="font-serif-luxury font-bold text-2xl sm:text-3xl" style="color: var(--text-primary);">Time</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[11px] uppercase tracking-[0.2em] mb-3 font-semibold opacity-75" style="color: var(--text-secondary);">Counting Down To Forever</p>
+                        <div class="grid grid-cols-4 gap-2.5 sm:gap-4 max-w-md mx-auto">
+                            <div class="p-3 rounded-2xl border shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                                <span id="cd-days" class="font-serif-luxury font-bold text-2xl sm:text-3xl block" style="color: var(--accent-main);">00</span>
+                                <span class="text-[10px] uppercase tracking-wider opacity-70">Days</span>
+                            </div>
+                            <div class="p-3 rounded-2xl border shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                                <span id="cd-hours" class="font-serif-luxury font-bold text-2xl sm:text-3xl block" style="color: var(--accent-main);">00</span>
+                                <span class="text-[10px] uppercase tracking-wider opacity-70">Hours</span>
+                            </div>
+                            <div class="p-3 rounded-2xl border shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                                <span id="cd-mins" class="font-serif-luxury font-bold text-2xl sm:text-3xl block" style="color: var(--accent-main);">00</span>
+                                <span class="text-[10px] uppercase tracking-wider opacity-70">Mins</span>
+                            </div>
+                            <div class="p-3 rounded-2xl border shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                                <span id="cd-secs" class="font-serif-luxury font-bold text-2xl sm:text-3xl block" style="color: var(--accent-main);">00</span>
+                                <span class="text-[10px] uppercase tracking-wider opacity-70">Secs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-3xl p-6 sm:p-8 border text-center space-y-4 shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                        <div class="w-11 h-11 rounded-full mx-auto flex items-center justify-center" style="background-color: var(--accent-soft); color: var(--accent-main);">
+                            <i data-lucide="map-pin" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase tracking-widest opacity-60 mb-1" style="color: var(--text-secondary);">Ceremony &amp; Reception</p>
+                            <h3 id="display-venue-name" class="font-serif-luxury font-bold text-xl sm:text-2xl" style="color: var(--text-primary);">Venue</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="py-6 px-6 text-center border-t text-xs opacity-65" style="border-color: var(--border-ornate); color: var(--text-secondary);">
+                <p id="footer-hashtag" class="font-serif-luxury italic text-base mb-1">#Wedding</p>
+                <p>Crafted with Love • Interactive Digital Wedding Invitation</p>
+            </footer>
+        </div>
+    </main>
+
+    <!-- ==========================================
+         APPLICATION JAVASCRIPT
+         ========================================== -->
+    <script>
+        // State
+        let config = {
+            groom: "", bride: "",
+            groomParents: "", brideParents: "",
+            date: "", timeText: "",
+            venue: "", greeting: "",
+            style: "kandyan", color: "royalGold", music: "harp"
+        };
+        
+        // Music logic
+        let audioCtx = null;
+        let isPlayingAudio = false;
+        let melodyInterval = null;
+        let noteIdx = 0;
+
+        const melodies = {
+            harp: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 349.23, 440.00, 587.33],
+            flute: [440.00, 493.88, 523.25, 587.33, 659.25, 587.33, 523.25, 493.88],
+            piano: [261.63, 261.63, 392.00, 392.00, 440.00, 440.00, 392.00, 349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63]
+        };
+
+        const palettes = {
+            royalGold: { bgPrimary: "#FAF6F0", bgCard: "#FFFFFF", textPrimary: "#2C221E", textSecondary: "#6E5A4F", accentMain: "#C59B27", accentSoft: "#F3E8C8", borderOrnate: "#E2D1A7", ambient: "radial-gradient(circle at 50% 20%, #C59B27 0%, #3a2a1d 45%, #0f0d0c 100%)" },
+            sageBlush: { bgPrimary: "#F4F7F4", bgCard: "#FFFFFF", textPrimary: "#1E2923", textSecondary: "#52665A", accentMain: "#5F7A61", accentSoft: "#E3ECE4", borderOrnate: "#C5D6C7", ambient: "radial-gradient(circle at 50% 20%, #5F7A61 0%, #1E2923 45%, #0B120E 100%)" },
+            burgundy: { bgPrimary: "#FDF8F8", bgCard: "#FFFFFF", textPrimary: "#2D1216", textSecondary: "#6E4248", accentMain: "#801828", accentSoft: "#F7E4E7", borderOrnate: "#E6C3C8", ambient: "radial-gradient(circle at 50% 20%, #801828 0%, #380A11 45%, #120406 100%)" },
+            midnight: { bgPrimary: "#0F172A", bgCard: "#1E293B", textPrimary: "#F8FAFC", textSecondary: "#94A3B8", accentMain: "#D4AF37", accentSoft: "#334155", borderOrnate: "#475569", ambient: "radial-gradient(circle at 50% 20%, #1E3A8A 0%, #0F172A 50%, #020617 100%)" }
+        };
+
+        // --- ENCODING UTILS FOR SHARE LINK ---
+        function encodeConfig(c) {
+            return btoa(encodeURIComponent(JSON.stringify(c)));
+        }
+        function decodeConfig(str) {
+            try { return JSON.parse(decodeURIComponent(atob(str))); } catch(e) { return null; }
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const urlParams = new URLSearchParams(window.location.search);
+            const isGuest = urlParams.get('guest') === '1';
+
+            if (isGuest) {
+                const loadedConfig = decodeConfig(urlParams.get('cfg'));
+                if (loadedConfig) config = loadedConfig;
+                
+                // Hide Setup, Show Envelope directly
+                document.getElementById('setup-screen').classList.add('hidden');
+                document.getElementById('envelope-screen').classList.remove('hidden');
+                document.getElementById('floating-controls').classList.remove('hidden');
+                applyConfigToUI();
+            } else {
+                // Set some defaults for the form to make testing easier
+                document.getElementById('setup-date').value = new Date().toISOString().split('T')[0];
+            }
+            resizeCanvas();
+            createParticles();
+            animateParticles();
+            setInterval(updateCountdown, 1000);
+        });
+
+        // --- CREATE INVITATION (ADMIN LOGIC) ---
+        function handleCreateInvitation(e) {
+            e.preventDefault();
+            
+            // Gather form data
+            config.groom = document.getElementById('setup-groom').value.trim();
+            config.bride = document.getElementById('setup-bride').value.trim();
+            config.groomParents = document.getElementById('setup-groom-parents').value.trim();
+            config.brideParents = document.getElementById('setup-bride-parents').value.trim();
+            config.date = document.getElementById('setup-date').value;
+            config.timeText = document.getElementById('setup-time').value.trim();
+            config.venue = document.getElementById('setup-venue').value.trim();
+            config.greeting = document.getElementById('setup-greeting').value.trim();
+            config.style = document.getElementById('setup-style').value;
+            config.color = document.getElementById('setup-color').value;
+            config.music = document.getElementById('setup-music').value;
+
+            applyConfigToUI();
+
+            // Generate Shareable Link
+            const baseUrl = window.location.href.split('?')[0];
+            const shareUrl = `${baseUrl}?guest=1&cfg=${encodeConfig(config)}`;
+            document.getElementById('shareable-link-input').value = shareUrl;
+
+            // Switch UI Views
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('admin-share-bar').classList.remove('hidden');
+            document.getElementById('floating-controls').classList.remove('hidden');
+            document.getElementById('envelope-screen').classList.remove('hidden');
+        }
+
+        function copyGeneratedLink() {
+            const input = document.getElementById('shareable-link-input');
+            input.select();
+            document.execCommand('copy');
+            alert("Guest Link Copied! You can now send this link to your guests.");
+        }
+
+        // --- APPLY DATA TO UI ---
+        function applyConfigToUI() {
+            // Text Replacements
+            document.getElementById('env-couple-names').textContent = `${config.groom} & ${config.bride}`;
+            document.getElementById('env-monogram').textContent = `${config.groom.charAt(0)}&${config.bride.charAt(0)}`;
+            
+            document.getElementById('card-groom-name').textContent = config.groom;
+            document.getElementById('card-bride-name').textContent = config.bride;
+            document.getElementById('card-groom-parents').textContent = config.groomParents;
+            document.getElementById('card-bride-parents').textContent = config.brideParents;
+            document.getElementById('card-welcome-msg').textContent = config.greeting;
+            
+            document.getElementById('stage-groom-label').textContent = config.groom;
+            document.getElementById('stage-bride-label').textContent = config.bride;
+            
+            // Format Date
+            const dObj = new Date(config.date + 'T00:00:00');
+            const dateStr = isNaN(dObj) ? config.date : dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            
+            document.getElementById('env-date').textContent = `${dateStr} • ${config.venue.split(',')[0]}`;
+            document.getElementById('display-date-formatted').textContent = dateStr;
+            document.getElementById('display-time-formatted').textContent = config.timeText;
+            document.getElementById('display-venue-name').textContent = config.venue;
+            document.getElementById('footer-hashtag').textContent = `#${config.groom}Weds${config.bride}`;
+
+            // Apply Theme Palette
+            const p = palettes[config.color];
+            const root = document.documentElement;
+            root.style.setProperty('--bg-primary', p.bgPrimary);
+            root.style.setProperty('--bg-card', p.bgCard);
+            root.style.setProperty('--text-primary', p.textPrimary);
+            root.style.setProperty('--text-secondary', p.textSecondary);
+            root.style.setProperty('--accent-main', p.accentMain);
+            root.style.setProperty('--accent-soft', p.accentSoft);
+            root.style.setProperty('--border-ornate', p.borderOrnate);
+            document.getElementById('ambient-bg').style.background = p.ambient;
+
+            renderSVGCharacters();
+            updateCountdown();
+        }
+
+        // --- ENVELOPE INTERACTION ---
+        function openInvitation() {
+            document.getElementById('envelope-screen').classList.add('opened');
+            document.getElementById('invitation-wrapper').classList.remove('hidden');
+            toggleAudio(true);
+            setTimeout(() => triggerCharacterReaction('joy'), 550);
+        }
+
+        function resetEnvelope() {
+            document.getElementById('envelope-screen').classList.remove('opened');
+            document.getElementById('invitation-wrapper').classList.add('hidden');
+            toggleAudio(false); // Stop music when closing back to envelope
+        }
+
+        // --- MUSIC GENERATION ---
+        function playNote(freq, type = 'sine') {
+            if (!isPlayingAudio) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = config.music === 'piano' ? 'triangle' : (config.music === 'flute' ? 'sine' : 'sine');
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(config.music === 'flute' ? 0.08 : 0.06, audioCtx.currentTime + 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.2);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 2.3);
+            } catch (e) {}
+        }
+
+        function toggleAudio(forceStart = false) {
+            if (forceStart && isPlayingAudio) return;
+            isPlayingAudio = forceStart ? true : !isPlayingAudio;
+            const btn = document.getElementById('audio-toggle-btn');
+            
+            if (isPlayingAudio) {
+                btn.innerHTML = `<i data-lucide="volume-2" class="w-3.5 h-3.5 text-amber-400"></i><span id="audio-label">Music On</span>`;
+                const track = melodies[config.music] || melodies.harp;
+                playNote(track[0]);
+                clearInterval(melodyInterval);
+                melodyInterval = setInterval(() => {
+                    noteIdx = (noteIdx + 1) % track.length;
+                    playNote(track[noteIdx]);
+                }, config.music === 'flute' ? 1200 : 1450);
+            } else {
+                clearInterval(melodyInterval);
+                btn.innerHTML = `<i data-lucide="volume-x" class="w-3.5 h-3.5 text-amber-400"></i><span id="audio-label">Music Off</span>`;
+            }
+            lucide.createIcons();
+        }
+
+        // --- CHARACTER ANIMATIONS & REACTIONS ---
+        function triggerGroomSolo(e) {
+            if(e) e.stopPropagation();
+            const box = document.getElementById('groom-svg-box');
+            box.classList.remove('groom-solo-active'); void box.offsetWidth; box.classList.add('groom-solo-active');
+            showBubble('groom-bubble', "Welcome! 🙏");
+            spawnParticles(['✨', '🎩', '💛'], 10);
+            playNote(523.25);
+        }
+
+        function triggerBrideSolo(e) {
+            if(e) e.stopPropagation();
+            const box = document.getElementById('bride-svg-box');
+            box.classList.remove('bride-solo-active'); void box.offsetWidth; box.classList.add('bride-solo-active');
+            showBubble('bride-bubble', "So happy you're here! 💐");
+            spawnParticles(['🌸', '💖', '✨'], 55);
+            playNote(659.25);
+        }
+
+        function triggerCharacterReaction() {
+            const gb = document.getElementById('groom-svg-box');
+            const bb = document.getElementById('bride-svg-box');
+            gb.classList.remove('couple-celebrate'); bb.classList.remove('couple-celebrate');
+            void gb.offsetWidth;
+            gb.classList.add('couple-celebrate'); bb.classList.add('couple-celebrate');
+            showBubble('groom-bubble', "Hooray! 🎉");
+            showBubble('bride-bubble', "Can't wait! 💖");
+            spawnParticles(['💖', '✨', '🌸', '🥂'], 15, 70);
+            playNote(587.33);
+        }
+
+        function showBubble(id, text) {
+            const b = document.getElementById(id);
+            b.textContent = text;
+            b.classList.remove('opacity-0', '-translate-y-1');
+            setTimeout(() => b.classList.add('opacity-0', '-translate-y-1'), 1800);
+        }
+
+        // --- 6 WEDDING THEMES SVGs (Minimalist Vector Representations) ---
+        function renderSVGCharacters() {
+            const groomBox = document.getElementById('groom-svg-box');
+            const brideBox = document.getElementById('bride-svg-box');
+            const cap = document.getElementById('attire-caption');
+            const style = config.style;
+
+            // Shared structural elements for animations to attach to
+            const baseGroomStart = `<svg viewBox="0 0 160 250" class="w-full h-full max-w-[155px] drop-shadow-md overflow-visible"><ellipse cx="80" cy="240" rx="40" ry="6" fill="rgba(0,0,0,0.12)"/><g class="groom-body-anim">`;
+            const baseBrideStart = `<svg viewBox="0 0 160 250" class="w-full h-full max-w-[155px] drop-shadow-md overflow-visible"><ellipse cx="80" cy="240" rx="44" ry="6" fill="rgba(0,0,0,0.12)"/><g class="bride-body-anim">`;
+            const armAnimGroom = `<g class="groom-arm-anim">`;
+            const headAnimGroom = `</g><g class="groom-head-anim"><rect x="74" y="74" width="12" height="18" rx="4" fill="#E5B89B"/><circle cx="80" cy="52" r="24" fill="#E5B89B"/>`;
+            const armAnimBride = `</g><g class="bride-arm-anim">`;
+            const headAnimBride = `<g class="bride-head-anim"><rect x="74" y="80" width="12" height="20" rx="4" fill="#E5B89B"/><circle cx="80" cy="60" r="22" fill="#E5B89B"/>`;
+            const closeAnim = `</g></g></svg>`;
+
+            if (style === 'kandyan') {
+                cap.textContent = "Kandyan Nilame & Osariya";
+                groomBox.innerHTML = baseGroomStart + 
+                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FFFDF9" stroke="#E2D1A7" stroke-width="1.5"/><path d="M 38,98 Q 50,86 80,86 Q 110,86 122,98 L 110,154 L 50,154 Z" fill="#9E1B32" stroke="#DF9F28" stroke-width="2.5"/><polygon points="52,146 108,146 98,164 62,164" fill="#DF9F28"/>` + 
+                    armAnimGroom + `<path d="M 114,102 Q 134,118 128,88" fill="none" stroke="#9E1B32" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="84" r="6.5" fill="#E5B89B"/>` + 
+                    headAnimGroom + `<path d="M 56,48 Q 80,30 104,48" fill="#1F1917"/><polygon points="44,36 80,19 116,36 102,43 58,43" fill="#DF9F28"/>` + closeAnim;
+                
+                brideBox.innerHTML = baseBrideStart + 
+                    `<path d="M 54,148 L 106,148 L 114,234 L 46,234 Z" fill="#FFFDF7" stroke="#DF9F28" stroke-width="2"/><path d="M 54,98 L 88,98 L 104,190 L 66,170 Z" fill="#9E1B32" opacity="0.92"/>` +
+                    headAnimBride + `<path d="M 58,58 Q 80,36 102,58" fill="#1C1614"/><path d="M 59,52 Q 80,60 101,52" fill="none" stroke="#DF9F28" stroke-width="2.5"/>` +
+                    armAnimBride + `<path d="M 48,114 Q 36,134 58,142" fill="none" stroke="#E5B89B" stroke-width="8" stroke-linecap="round"/><circle cx="58" cy="142" r="15" fill="#FCE7F3"/><circle cx="52" cy="139" r="6" fill="#9E1B32"/>` + closeAnim;
+            
+            } else if (style === 'western') {
+                cap.textContent = "Classic Western Elegance";
+                groomBox.innerHTML = baseGroomStart + 
+                    `<rect x="58" y="162" width="19" height="74" rx="4" fill="#1E293B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#1E293B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#0F172A"/><polygon points="66,92 94,92 80,136" fill="#FFFFFF"/><polygon points="72,96 88,104 88,96 72,104" fill="#333"/>` + 
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#0F172A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Q 90,34 56,46 Z" fill="#27272A"/>` + closeAnim;
+                
+                brideBox.innerHTML = baseBrideStart + 
+                    `<path d="M 80,32 Q 132,65 134,190 Q 80,202 26,182 Q 30,65 80,32 Z" fill="#FFFFFF" opacity="0.6"/><path d="M 60,102 L 100,102 L 128,234 Q 80,244 32,234 Z" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>` +
+                    headAnimBride + `<path d="M 58,54 Q 80,30 102,54" fill="#27272A"/>` +
+                    armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="16" fill="#DCFCE7"/><circle cx="60" cy="141" r="7" fill="#F43F5E"/>` + closeAnim;
+            
+            } else if (style === 'tamil_hindu') {
+                cap.textContent = "Tamil Hindu Wedding";
+                groomBox.innerHTML = baseGroomStart + 
+                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/><path d="M 46,94 Q 80,86 114,94 L 106,160 L 54,160 Z" fill="#FFFDF9" stroke="#E2D1A7"/><path d="M 60,94 L 80,140 L 100,94" fill="none" stroke="#F43F5E" stroke-width="6" stroke-dasharray="4 2"/>` + // Garland
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#FFFDF9" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><circle cx="80" cy="42" r="3" fill="#EF4444"/>` + closeAnim; // POTTU
+                
+                brideBox.innerHTML = baseBrideStart + 
+                    `<path d="M 54,148 L 106,148 L 118,234 L 42,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="3"/><path d="M 50,110 Q 80,180 110,130 L 100,100 Z" fill="#FBBF24" opacity="0.9"/><path d="M 60,98 L 80,145 L 100,98" fill="none" stroke="#F43F5E" stroke-width="8" stroke-dasharray="5 3"/>` + // Saree & Garland
+                    headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#1C1614"/><circle cx="80" cy="46" r="3" fill="#EF4444"/><path d="M 80,30 L 80,42" stroke="#FBBF24" stroke-width="2"/>` + // Nethichutti
+                    armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="12" fill="#FBBF24"/>` + closeAnim;
+            
+            } else if (style === 'muslim') {
+                cap.textContent = "Muslim Nikkah";
+                groomBox.innerHTML = baseGroomStart + 
+                    `<path d="M 52,160 L 108,160 L 112,232 L 48,232 Z" fill="#F8FAFC"/><path d="M 46,94 Q 80,86 114,94 L 106,180 L 54,180 Z" fill="#1E3A8A"/><line x1="80" y1="94" x2="80" y2="170" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4 6"/>` + // Sherwani
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E3A8A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    headAnimGroom + `<path d="M 62,38 Q 80,24 98,38 Z" fill="#1E3A8A"/><path d="M 56,46 Q 80,38 104,46 Z" fill="#1F1917"/>` + closeAnim; // Kufi
+                
+                brideBox.innerHTML = baseBrideStart + 
+                    `<path d="M 54,148 L 106,148 L 120,234 L 40,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="2"/><path d="M 54,98 L 106,98 L 110,150 L 50,150 Z" fill="#F43F5E"/><path d="M 70,30 Q 110,40 100,120 Q 70,140 50,110 Z" fill="#FECDD3" opacity="0.9"/>` + // Lehenga & Hijab Wrap
+                    headAnimBride + `<circle cx="80" cy="60" r="22" fill="#E5B89B"/><path d="M 58,54 Q 80,36 102,54 Q 80,20 58,54" fill="#FECDD3"/>` + // Hijab top
+                    armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#F43F5E" stroke-width="8" stroke-linecap="round"/><circle cx="66" cy="144" r="14" fill="#FBBF24"/>` + closeAnim;
+            
+            } else if (style === 'low_country') {
+                cap.textContent = "Low Country Traditional";
+                groomBox.innerHTML = baseGroomStart + 
+                    `<path d="M 52,150 L 108,150 L 112,232 L 48,232 Z" fill="#FFFFFF" stroke="#CBD5E1"/><path d="M 46,94 Q 80,86 114,94 L 106,154 L 54,154 Z" fill="#1E293B"/><polygon points="66,92 94,92 80,120" fill="#FFFFFF"/>` + // Jacket & Sarong
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E293B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><path d="M 70,30 Q 80,10 90,30" fill="none" stroke="#FBBF24" stroke-width="3"/>` + closeAnim; // Hair Comb (Panawa)
+                
+                brideBox.innerHTML = baseBrideStart + 
+                    `<path d="M 60,102 L 100,102 L 118,234 Q 80,242 42,234 Z" fill="#FFFDF9" stroke="#E7E5E4" stroke-width="2"/><path d="M 45,100 Q 80,140 115,120 L 100,230 L 60,230 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-dasharray="2 2"/>` + // Lace details
+                    headAnimBride + `<path d="M 58,54 Q 80,30 102,54" fill="#1C1614"/><circle cx="80" cy="30" r="10" fill="#1C1614"/>` + // Low bun
+                    armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="14" fill="#F43F5E"/>` + closeAnim;
+            
+            } else {
+                // Modern Luxury
+                cap.textContent = "Modern Luxury Elegance";
+                groomBox.innerHTML = baseGroomStart + 
+                    `<rect x="58" y="162" width="19" height="74" rx="4" fill="#09090B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#09090B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#09090B"/><polygon points="66,92 94,92 80,146" fill="#000"/><polygon points="75,98 85,98 80,104" fill="#FFF"/>` + // Tuxedo Black
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#09090B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    headAnimGroom + `<path d="M 56,46 Q 80,24 104,46 Q 90,34 56,46 Z" fill="#18181B"/>` + closeAnim;
+                
+                brideBox.innerHTML = baseBrideStart + 
+                    `<path d="M 64,102 L 96,102 L 105,180 Q 120,230 140,240 L 20,240 Q 40,230 55,180 Z" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="1"/>` + // Mermaid dress
+                    headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#27272A"/>` +
+                    armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="10" fill="#E4E4E7"/>` + closeAnim;
+            }
+        }
+
+        // --- PARTICLE FX & TIMERS ---
+        function spawnParticles(symbols, leftMin = 15, leftRange = 70) {
+            const layer = document.getElementById('couple-reaction-layer');
+            for (let i = 0; i < 8; i++) {
+                const item = document.createElement('div');
+                const left = leftMin + Math.random() * leftRange;
+                item.style.cssText = `position:absolute; bottom:38%; left:${left}%; animation: floatUp 1.7s ease-out ${Math.random()*0.3}s forwards; font-size:${15 + Math.random()*12}px;`;
+                item.textContent = symbols[i % symbols.length];
+                layer.appendChild(item);
+                setTimeout(() => item.remove(), 2100);
+            }
+        }
+
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < 28; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    size: 5 + Math.random() * 7, speedY: 0.4 + Math.random() * 0.9,
+                    speedX: -0.4 + Math.random() * 0.8, angle: Math.random() * Math.PI * 2,
+                    spin: -0.02 + Math.random() * 0.04, opacity: 0.25 + Math.random() * 0.45
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.y += p.speedY; p.x += p.speedX + Math.sin(p.angle) * 0.3; p.angle += p.spin;
+                if (p.y > canvas.height + 20) { p.y = -15; p.x = Math.random() * canvas.width; }
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle); ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = "#FDA4AF";
+                ctx.beginPath(); ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function updateCountdown() {
+            if(!config.date) return;
+            const target = new Date(config.date + "T09:45:00").getTime();
+            const diff = Math.max(0, target - Date.now());
+            document.getElementById('cd-days').textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            document.getElementById('cd-hours').textContent = String(Math.floor((diff / 3600000) % 24)).padStart(2, '0');
+            document.getElementById('cd-mins').textContent = String(Math.floor((diff / 60000) % 60)).padStart(2, '0');
+            document.getElementById('cd-secs').textContent = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+        }
+    </script>
+</body>
+</html>
