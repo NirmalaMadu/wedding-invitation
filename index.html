@@ -92,7 +92,7 @@
                     <i data-lucide="wand-2" class="w-8 h-8"></i>
                 </div>
                 <h1 class="font-serif-luxury text-4xl text-white mb-2">Create Your Wedding Invitation</h1>
-                <p class="text-sm text-stone-400">Fill in your details below. Once generated, you'll receive a secure link to send to your guests.</p>
+                <p class="text-sm text-stone-400">Fill in your details below. Once generated, you'll receive a secure custom link to send to your guests.</p>
             </div>
 
             <form id="creator-setup-form" class="space-y-8" onsubmit="handleCreateInvitation(event)">
@@ -209,10 +209,13 @@
             <i data-lucide="check-circle" class="w-5 h-5"></i>
             <span class="text-sm font-semibold">Invitation Created Successfully!</span>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <input type="text" id="shareable-link-input" readonly class="flex-1 sm:w-96 bg-emerald-900/50 border border-emerald-700 rounded-lg px-3 py-1.5 text-xs text-emerald-100 font-mono outline-none">
-            <button onclick="copyGeneratedLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 whitespace-nowrap">
-                <i data-lucide="copy" class="w-4 h-4"></i> Copy Guest Link
+        <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+            <input type="text" id="shareable-link-input" readonly class="flex-1 sm:w-80 bg-emerald-900/50 border border-emerald-700 rounded-lg px-3 py-1.5 text-xs text-emerald-100 font-mono outline-none">
+            <button onclick="copyGeneratedLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 whitespace-nowrap">
+                <i data-lucide="copy" class="w-4 h-4"></i> Copy Link
+            </button>
+            <button onclick="createShortLink()" id="shorten-btn" class="bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-600 px-3 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 whitespace-nowrap">
+                <i data-lucide="link" class="w-4 h-4"></i> Shorten Link
             </button>
         </div>
     </div>
@@ -547,12 +550,24 @@
             midnight: { bgPrimary: "#0F172A", bgCard: "#1E293B", textPrimary: "#F8FAFC", textSecondary: "#94A3B8", accentMain: "#D4AF37", accentSoft: "#334155", borderOrnate: "#475569", ambient: "radial-gradient(circle at 50% 20%, #1E3A8A 0%, #0F172A 50%, #020617 100%)" }
         };
 
-        // --- ENCODING UTILS FOR SHARE LINK ---
-        function encodeConfig(c) {
-            return btoa(encodeURIComponent(JSON.stringify(c)));
-        }
-        function decodeConfig(str) {
-            try { return JSON.parse(decodeURIComponent(atob(str))); } catch(e) { return null; }
+        // --- URL ENCODING FOR SHARE LINK (Readable Parameters instead of Base64) ---
+        function buildReadableLink(c) {
+            const params = new URLSearchParams();
+            params.set('guest', '1');
+            params.set('groom', c.groom);
+            params.set('bride', c.bride);
+            params.set('gParents', c.groomParents);
+            params.set('bParents', c.brideParents);
+            params.set('date', c.date);
+            params.set('time', c.timeText);
+            params.set('venue', c.venue);
+            params.set('msg', c.greeting);
+            params.set('style', c.style);
+            params.set('color', c.color);
+            params.set('music', c.music);
+            
+            const baseUrl = window.location.href.split('?')[0];
+            return `${baseUrl}?${params.toString()}`;
         }
 
         // --- INITIALIZATION ---
@@ -562,8 +577,25 @@
             const isGuest = urlParams.get('guest') === '1';
 
             if (isGuest) {
-                const loadedConfig = decodeConfig(urlParams.get('cfg'));
-                if (loadedConfig) config = loadedConfig;
+                // Support both new Readable URL params and legacy Base64 cfg for older links
+                if (urlParams.get('cfg')) {
+                    try { 
+                        const loadedConfig = JSON.parse(decodeURIComponent(atob(urlParams.get('cfg'))));
+                        if (loadedConfig) config = loadedConfig;
+                    } catch(e) {}
+                } else {
+                    config.groom = urlParams.get('groom') || "";
+                    config.bride = urlParams.get('bride') || "";
+                    config.groomParents = urlParams.get('gParents') || "";
+                    config.brideParents = urlParams.get('bParents') || "";
+                    config.date = urlParams.get('date') || "";
+                    config.timeText = urlParams.get('time') || "";
+                    config.venue = urlParams.get('venue') || "";
+                    config.greeting = urlParams.get('msg') || "";
+                    config.style = urlParams.get('style') || "kandyan";
+                    config.color = urlParams.get('color') || "royalGold";
+                    config.music = urlParams.get('music') || "harp";
+                }
                 
                 // Hide Setup, Show Envelope directly
                 document.getElementById('setup-screen').classList.add('hidden');
@@ -599,10 +631,8 @@
 
             applyConfigToUI();
 
-            // Generate Shareable Link
-            const baseUrl = window.location.href.split('?')[0];
-            const shareUrl = `${baseUrl}?guest=1&cfg=${encodeConfig(config)}`;
-            document.getElementById('shareable-link-input').value = shareUrl;
+            // Generate Readable Custom Shareable Link
+            document.getElementById('shareable-link-input').value = buildReadableLink(config);
 
             // Switch UI Views
             document.getElementById('setup-screen').classList.add('hidden');
@@ -615,7 +645,34 @@
             const input = document.getElementById('shareable-link-input');
             input.select();
             document.execCommand('copy');
-            alert("Guest Link Copied! You can now send this link to your guests.");
+            alert("Guest Link Copied! You can now send this custom link to your guests.");
+        }
+
+        async function createShortLink() {
+            const input = document.getElementById('shareable-link-input');
+            const btn = document.getElementById('shorten-btn');
+            const originalUrl = input.value;
+            
+            if (originalUrl.includes("tinyurl.com")) return; // Already short
+            
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Wait...`;
+            
+            try {
+                // Using TinyURL's free API to shorten the link
+                const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(originalUrl)}`);
+                if (response.ok) {
+                    const shortUrl = await response.text();
+                    input.value = shortUrl;
+                    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Done`;
+                    btn.classList.replace('bg-emerald-800', 'bg-emerald-600');
+                } else {
+                    throw new Error("Failed");
+                }
+            } catch(e) {
+                alert("Could not shorten link automatically. You can copy the long link and paste it into Bitly.com to make a custom link!");
+                btn.innerHTML = `<i data-lucide="link" class="w-4 h-4"></i> Shorten Link`;
+            }
+            lucide.createIcons();
         }
 
         // --- APPLY DATA TO UI ---
