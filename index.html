@@ -454,7 +454,7 @@
                     </button>
                 </div>
 
-                <!-- Form -->
+                <!-- Form connecting to Google Apps Script -->
                 <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)" class="space-y-4 rounded-3xl p-5 sm:p-7 border shadow-inner" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary);">Your Full Name</label>
@@ -673,7 +673,7 @@
             toggleAudio(false); 
         }
 
-        // --- R.S.V.P FORM LOGIC ---
+        // --- R.S.V.P FORM LOGIC (LINKED TO GOOGLE SHEETS) ---
         function selectAttendance(choice) {
             currentAttendanceChoice = choice;
             const btnYes = document.getElementById('btn-attend-yes');
@@ -704,20 +704,55 @@
             }
         }
 
-        function handleRSVPSubmit(e) {
+        async function handleRSVPSubmit(e) {
             e.preventDefault();
+            
+            // Get form values
             const name = document.getElementById('rsvp-name').value.trim();
             const guests = currentAttendanceChoice === 'yes' ? document.getElementById('rsvp-guests').value : "0";
+            const greeting = document.getElementById('rsvp-message').value.trim() || "-";
             
-            document.getElementById('rsvp-form').classList.add('hidden');
-            document.getElementById('rsvp-confirmation').classList.remove('hidden');
+            const submitBtn = document.getElementById('rsvp-submit-btn');
+            const btnText = document.getElementById('rsvp-submit-text');
             
-            const summary = document.getElementById('confirm-summary');
-            if (currentAttendanceChoice === 'yes') {
-                summary.textContent = `Thank you, ${name}! We have recorded ${guests} guest(s) attending. ${config.groom} & ${config.bride} can't wait to see you!`;
-                triggerCharacterReaction();
-            } else {
-                summary.textContent = `Thank you, ${name}. Your warm wishes have been sent. ${config.groom} & ${config.bride} will miss you!`;
+            // Save original button text and show loading state
+            const originalText = btnText.textContent;
+            btnText.textContent = "Sending...";
+            submitBtn.disabled = true;
+
+            // GOOGLE APPS SCRIPT WEB APP URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycby958tWrLe95YokgetluP9wryRsu9_ON6Oow0jxxOK5FnRwppuJsINVJ52TOXyeijq-/exec';
+
+            try {
+                // Send the data securely to Google Sheet
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: name,
+                        attending: currentAttendanceChoice === 'yes' ? 'Yes' : 'No',
+                        guests: guests,
+                        greeting: greeting
+                    }),
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8', 
+                    }
+                });
+
+                // Hide the form and show the success confirmation
+                document.getElementById('rsvp-form').classList.add('hidden');
+                document.getElementById('rsvp-confirmation').classList.remove('hidden');
+                
+                const summary = document.getElementById('confirm-summary');
+                if (currentAttendanceChoice === 'yes') {
+                    summary.textContent = `Thank you, ${name}! We have recorded ${guests} guest(s) attending. ${config.groom} & ${config.bride} can't wait to see you!`;
+                    triggerCharacterReaction();
+                } else {
+                    summary.textContent = `Thank you, ${name}. Your warm wishes have been sent. ${config.groom} & ${config.bride} will miss you!`;
+                }
+            } catch (error) {
+                alert("Something went wrong submitting your RSVP. Please try again.");
+                btnText.textContent = originalText;
+                submitBtn.disabled = false;
             }
         }
 
@@ -725,6 +760,10 @@
             document.getElementById('rsvp-form').reset();
             document.getElementById('rsvp-form').classList.remove('hidden');
             document.getElementById('rsvp-confirmation').classList.add('hidden');
+            
+            // Reset button state just in case
+            document.getElementById('rsvp-submit-btn').disabled = false;
+            document.getElementById('rsvp-submit-text').textContent = currentAttendanceChoice === 'yes' ? "Confirm Attendance" : "Send Wishes";
         }
 
         // --- MUSIC GENERATION ---
