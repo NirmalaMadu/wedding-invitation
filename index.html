@@ -58,12 +58,10 @@
         @keyframes groomSoloBow { 0%, 100% { transform: translateY(0) rotate(0deg) scale(1); } 30% { transform: translateY(-12px) rotate(-6deg) scale(1.05); } 60% { transform: translateY(4px) rotate(8deg) scale(1.02); } }
         @keyframes brideSoloCurtsy { 0%, 100% { transform: translateY(0) rotate(0deg) scale(1); } 35% { transform: translateY(8px) rotate(-4deg) scale(0.98); } 70% { transform: translateY(-14px) rotate(5deg) scale(1.06); } }
         @keyframes celebrateJump { 0%, 100% { transform: translateY(0) scale(1); } 25% { transform: translateY(-18px) scale(1.05) rotate(-3deg); } 50% { transform: translateY(0) scale(1); } 75% { transform: translateY(-12px) scale(1.03) rotate(3deg); } }
-        @keyframes sympatheticWave { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg) translateY(-4px); } 75% { transform: rotate(5deg) translateY(-4px); } }
 
         .groom-solo-active { animation: groomSoloBow 0.95s ease-in-out 1 !important; }
         .bride-solo-active { animation: brideSoloCurtsy 0.95s ease-in-out 1 !important; }
         .couple-celebrate { animation: celebrateJump 0.9s ease-in-out 2 !important; }
-        .couple-sympathy { animation: sympatheticWave 0.9s ease-in-out 2 !important; }
         .floating-heart { animation: floatUp 3.5s ease-in infinite; }
         .wax-seal-btn { animation: pulseSeal 2.5s infinite; }
 
@@ -407,6 +405,108 @@
                 </div>
             </div>
 
+            <!-- Ornamental Divider -->
+            <div class="px-10 py-6 flex items-center justify-center gap-3 opacity-60">
+                <div class="h-px flex-1" style="background-color: var(--border-ornate);"></div>
+                <span class="font-serif-luxury text-xl" style="color: var(--accent-main);">✦</span>
+                <div class="h-px flex-1" style="background-color: var(--border-ornate);"></div>
+            </div>
+
+            <!-- ==========================================
+                 6. GUEST R.S.V.P SECTION (In Design View)
+                 ========================================== -->
+            <section id="rsvp-section" class="p-6 sm:p-10 pt-0">
+                <div class="text-center mb-6">
+                    <p class="uppercase tracking-[0.25em] text-xs font-semibold" style="color: var(--accent-main);">R.S.V.P</p>
+                    <h2 class="font-serif-luxury font-bold text-3xl sm:text-4xl mt-1">Will You Celebrate With Us?</h2>
+                    <p class="text-xs sm:text-sm mt-1 opacity-75" style="color: var(--text-secondary);">
+                        Kindly respond by completing the form below.
+                    </p>
+                </div>
+
+                <!-- Attendance Toggle -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+                    <button type="button" id="btn-attend-yes" onclick="selectAttendance('yes')"
+                        class="group relative p-5 rounded-2xl border-2 text-left transition-all flex items-start gap-3.5 shadow-sm"
+                        style="background-color: var(--bg-card); border-color: var(--accent-main);">
+                        <div id="icon-attend-yes" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors text-white" style="background-color: var(--accent-main);">
+                            <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-sm sm:text-base">Joyfully Attending</span>
+                                <span id="check-yes" class="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs" style="background-color: var(--accent-main);">✓</span>
+                            </div>
+                        </div>
+                    </button>
+                    <button type="button" id="btn-attend-no" onclick="selectAttendance('no')"
+                        class="group relative p-5 rounded-2xl border-2 text-left transition-all flex items-start gap-3.5 opacity-80 hover:opacity-100"
+                        style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                        <div id="icon-attend-no" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors" style="background-color: var(--accent-soft); color: var(--text-secondary);">
+                            <i data-lucide="calendar-x" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-sm sm:text-base">Unable to Attend</span>
+                                <span id="check-no" class="hidden w-5 h-5 rounded-full items-center justify-center text-white text-xs" style="background-color: var(--accent-main);">✓</span>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Form -->
+                <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)" class="space-y-4 rounded-3xl p-5 sm:p-7 border shadow-inner" style="background-color: var(--bg-card); border-color: var(--border-ornate);">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary);">Your Full Name</label>
+                        <input type="text" id="rsvp-name" required placeholder="Enter your full name"
+                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition"
+                            style="border-color: var(--border-ornate); background-color: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    
+                    <div id="attending-extra-fields" class="transition-all">
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary);">Number of Guests Attending</label>
+                        <select id="rsvp-guests" class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition"
+                            style="border-color: var(--border-ornate); background-color: var(--bg-primary); color: var(--text-primary);">
+                            <option value="1">1 Guest (Just me)</option>
+                            <option value="2" selected>2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="5">5 Guests</option>
+                            <option value="6+">More than 5 Guests</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary);">Greeting / Message for the Couple</label>
+                        <textarea id="rsvp-message" rows="3" placeholder="Write a heartfelt greeting or wishes..."
+                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition"
+                            style="border-color: var(--border-ornate); background-color: var(--bg-primary); color: var(--text-primary);"></textarea>
+                    </div>
+
+                    <button type="submit" id="rsvp-submit-btn"
+                        class="w-full py-3.5 px-6 rounded-xl font-semibold text-sm uppercase tracking-wider text-white shadow-lg hover:opacity-95 transition transform active:scale-[0.99] flex items-center justify-center gap-2"
+                        style="background-color: var(--accent-main);">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span id="rsvp-submit-text">Confirm Attendance</span>
+                    </button>
+                </form>
+
+                <!-- Confirmation Receipt -->
+                <div id="rsvp-confirmation" class="hidden rounded-3xl p-6 sm:p-8 border text-center space-y-4 shadow-md"
+                     style="background-color: var(--bg-card); border-color: var(--accent-main);">
+                    <div class="w-14 h-14 rounded-full mx-auto flex items-center justify-center text-white shadow-md" style="background-color: var(--accent-main);">
+                        <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-serif-luxury font-bold text-2xl sm:text-3xl">Thank You!</h3>
+                    <p id="confirm-summary" class="text-sm opacity-80 max-w-md mx-auto"></p>
+                    <div class="pt-2">
+                        <button type="button" onclick="resetRSVPForm()" class="text-xs font-semibold underline opacity-75 hover:opacity-100" style="color: var(--accent-main);">
+                            Submit Another Response
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             <!-- Footer -->
             <footer class="py-6 px-6 text-center border-t text-xs opacity-65" style="border-color: var(--border-ornate); color: var(--text-secondary);">
                 <p id="footer-hashtag" class="font-serif-luxury italic text-base mb-1">#Wedding</p>
@@ -428,7 +528,7 @@
             style: "kandyan", color: "royalGold", music: "harp"
         };
         
-        // Music logic
+        let currentAttendanceChoice = 'yes'; // RSVP State
         let audioCtx = null;
         let isPlayingAudio = false;
         let melodyInterval = null;
@@ -471,7 +571,7 @@
                 document.getElementById('floating-controls').classList.remove('hidden');
                 applyConfigToUI();
             } else {
-                // Set some defaults for the form to make testing easier
+                // Set defaults for the form to make testing easier
                 document.getElementById('setup-date').value = new Date().toISOString().split('T')[0];
             }
             resizeCanvas();
@@ -570,11 +670,65 @@
         function resetEnvelope() {
             document.getElementById('envelope-screen').classList.remove('opened');
             document.getElementById('invitation-wrapper').classList.add('hidden');
-            toggleAudio(false); // Stop music when closing back to envelope
+            toggleAudio(false); 
+        }
+
+        // --- R.S.V.P FORM LOGIC ---
+        function selectAttendance(choice) {
+            currentAttendanceChoice = choice;
+            const btnYes = document.getElementById('btn-attend-yes');
+            const btnNo = document.getElementById('btn-attend-no');
+            const checkYes = document.getElementById('check-yes');
+            const checkNo = document.getElementById('check-no');
+            const extraFields = document.getElementById('attending-extra-fields');
+            const submitText = document.getElementById('rsvp-submit-text');
+
+            if (choice === 'yes') {
+                btnYes.style.borderColor = 'var(--accent-main)';
+                btnYes.classList.remove('opacity-80');
+                btnNo.style.borderColor = 'var(--border-ornate)';
+                btnNo.classList.add('opacity-80');
+                checkYes.classList.remove('hidden'); checkYes.classList.add('flex');
+                checkNo.classList.add('hidden');
+                extraFields.classList.remove('hidden');
+                submitText.textContent = "Confirm Attendance";
+            } else {
+                btnNo.style.borderColor = 'var(--accent-main)';
+                btnNo.classList.remove('opacity-80');
+                btnYes.style.borderColor = 'var(--border-ornate)';
+                btnYes.classList.add('opacity-80');
+                checkNo.classList.remove('hidden'); checkNo.classList.add('flex');
+                checkYes.classList.add('hidden');
+                extraFields.classList.add('hidden');
+                submitText.textContent = "Send Wishes";
+            }
+        }
+
+        function handleRSVPSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('rsvp-name').value.trim();
+            const guests = currentAttendanceChoice === 'yes' ? document.getElementById('rsvp-guests').value : "0";
+            
+            document.getElementById('rsvp-form').classList.add('hidden');
+            document.getElementById('rsvp-confirmation').classList.remove('hidden');
+            
+            const summary = document.getElementById('confirm-summary');
+            if (currentAttendanceChoice === 'yes') {
+                summary.textContent = `Thank you, ${name}! We have recorded ${guests} guest(s) attending. ${config.groom} & ${config.bride} can't wait to see you!`;
+                triggerCharacterReaction();
+            } else {
+                summary.textContent = `Thank you, ${name}. Your warm wishes have been sent. ${config.groom} & ${config.bride} will miss you!`;
+            }
+        }
+
+        function resetRSVPForm() {
+            document.getElementById('rsvp-form').reset();
+            document.getElementById('rsvp-form').classList.remove('hidden');
+            document.getElementById('rsvp-confirmation').classList.add('hidden');
         }
 
         // --- MUSIC GENERATION ---
-        function playNote(freq, type = 'sine') {
+        function playNote(freq) {
             if (!isPlayingAudio) return;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -660,7 +814,7 @@
             const cap = document.getElementById('attire-caption');
             const style = config.style;
 
-            // Shared structural elements for animations to attach to
+            // Shared structural elements for animations
             const baseGroomStart = `<svg viewBox="0 0 160 250" class="w-full h-full max-w-[155px] drop-shadow-md overflow-visible"><ellipse cx="80" cy="240" rx="40" ry="6" fill="rgba(0,0,0,0.12)"/><g class="groom-body-anim">`;
             const baseBrideStart = `<svg viewBox="0 0 160 250" class="w-full h-full max-w-[155px] drop-shadow-md overflow-visible"><ellipse cx="80" cy="240" rx="44" ry="6" fill="rgba(0,0,0,0.12)"/><g class="bride-body-anim">`;
             const armAnimGroom = `<g class="groom-arm-anim">`;
@@ -696,49 +850,48 @@
             } else if (style === 'tamil_hindu') {
                 cap.textContent = "Tamil Hindu Wedding";
                 groomBox.innerHTML = baseGroomStart + 
-                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/><path d="M 46,94 Q 80,86 114,94 L 106,160 L 54,160 Z" fill="#FFFDF9" stroke="#E2D1A7"/><path d="M 60,94 L 80,140 L 100,94" fill="none" stroke="#F43F5E" stroke-width="6" stroke-dasharray="4 2"/>` + // Garland
+                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/><path d="M 46,94 Q 80,86 114,94 L 106,160 L 54,160 Z" fill="#FFFDF9" stroke="#E2D1A7"/><path d="M 60,94 L 80,140 L 100,94" fill="none" stroke="#F43F5E" stroke-width="6" stroke-dasharray="4 2"/>` + 
                     armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#FFFDF9" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
-                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><circle cx="80" cy="42" r="3" fill="#EF4444"/>` + closeAnim; // POTTU
+                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><circle cx="80" cy="42" r="3" fill="#EF4444"/>` + closeAnim;
                 
                 brideBox.innerHTML = baseBrideStart + 
-                    `<path d="M 54,148 L 106,148 L 118,234 L 42,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="3"/><path d="M 50,110 Q 80,180 110,130 L 100,100 Z" fill="#FBBF24" opacity="0.9"/><path d="M 60,98 L 80,145 L 100,98" fill="none" stroke="#F43F5E" stroke-width="8" stroke-dasharray="5 3"/>` + // Saree & Garland
-                    headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#1C1614"/><circle cx="80" cy="46" r="3" fill="#EF4444"/><path d="M 80,30 L 80,42" stroke="#FBBF24" stroke-width="2"/>` + // Nethichutti
+                    `<path d="M 54,148 L 106,148 L 118,234 L 42,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="3"/><path d="M 50,110 Q 80,180 110,130 L 100,100 Z" fill="#FBBF24" opacity="0.9"/><path d="M 60,98 L 80,145 L 100,98" fill="none" stroke="#F43F5E" stroke-width="8" stroke-dasharray="5 3"/>` + 
+                    headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#1C1614"/><circle cx="80" cy="46" r="3" fill="#EF4444"/><path d="M 80,30 L 80,42" stroke="#FBBF24" stroke-width="2"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="12" fill="#FBBF24"/>` + closeAnim;
             
             } else if (style === 'muslim') {
                 cap.textContent = "Muslim Nikkah";
                 groomBox.innerHTML = baseGroomStart + 
-                    `<path d="M 52,160 L 108,160 L 112,232 L 48,232 Z" fill="#F8FAFC"/><path d="M 46,94 Q 80,86 114,94 L 106,180 L 54,180 Z" fill="#1E3A8A"/><line x1="80" y1="94" x2="80" y2="170" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4 6"/>` + // Sherwani
+                    `<path d="M 52,160 L 108,160 L 112,232 L 48,232 Z" fill="#F8FAFC"/><path d="M 46,94 Q 80,86 114,94 L 106,180 L 54,180 Z" fill="#1E3A8A"/><line x1="80" y1="94" x2="80" y2="170" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4 6"/>` + 
                     armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E3A8A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
-                    headAnimGroom + `<path d="M 62,38 Q 80,24 98,38 Z" fill="#1E3A8A"/><path d="M 56,46 Q 80,38 104,46 Z" fill="#1F1917"/>` + closeAnim; // Kufi
+                    headAnimGroom + `<path d="M 62,38 Q 80,24 98,38 Z" fill="#1E3A8A"/><path d="M 56,46 Q 80,38 104,46 Z" fill="#1F1917"/>` + closeAnim;
                 
                 brideBox.innerHTML = baseBrideStart + 
-                    `<path d="M 54,148 L 106,148 L 120,234 L 40,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="2"/><path d="M 54,98 L 106,98 L 110,150 L 50,150 Z" fill="#F43F5E"/><path d="M 70,30 Q 110,40 100,120 Q 70,140 50,110 Z" fill="#FECDD3" opacity="0.9"/>` + // Lehenga & Hijab Wrap
-                    headAnimBride + `<circle cx="80" cy="60" r="22" fill="#E5B89B"/><path d="M 58,54 Q 80,36 102,54 Q 80,20 58,54" fill="#FECDD3"/>` + // Hijab top
+                    `<path d="M 54,148 L 106,148 L 120,234 L 40,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="2"/><path d="M 54,98 L 106,98 L 110,150 L 50,150 Z" fill="#F43F5E"/><path d="M 70,30 Q 110,40 100,120 Q 70,140 50,110 Z" fill="#FECDD3" opacity="0.9"/>` +
+                    headAnimBride + `<circle cx="80" cy="60" r="22" fill="#E5B89B"/><path d="M 58,54 Q 80,36 102,54 Q 80,20 58,54" fill="#FECDD3"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#F43F5E" stroke-width="8" stroke-linecap="round"/><circle cx="66" cy="144" r="14" fill="#FBBF24"/>` + closeAnim;
             
             } else if (style === 'low_country') {
                 cap.textContent = "Low Country Traditional";
                 groomBox.innerHTML = baseGroomStart + 
-                    `<path d="M 52,150 L 108,150 L 112,232 L 48,232 Z" fill="#FFFFFF" stroke="#CBD5E1"/><path d="M 46,94 Q 80,86 114,94 L 106,154 L 54,154 Z" fill="#1E293B"/><polygon points="66,92 94,92 80,120" fill="#FFFFFF"/>` + // Jacket & Sarong
+                    `<path d="M 52,150 L 108,150 L 112,232 L 48,232 Z" fill="#FFFFFF" stroke="#CBD5E1"/><path d="M 46,94 Q 80,86 114,94 L 106,154 L 54,154 Z" fill="#1E293B"/><polygon points="66,92 94,92 80,120" fill="#FFFFFF"/>` +
                     armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E293B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
-                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><path d="M 70,30 Q 80,10 90,30" fill="none" stroke="#FBBF24" stroke-width="3"/>` + closeAnim; // Hair Comb (Panawa)
+                    headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><path d="M 70,30 Q 80,10 90,30" fill="none" stroke="#FBBF24" stroke-width="3"/>` + closeAnim;
                 
                 brideBox.innerHTML = baseBrideStart + 
-                    `<path d="M 60,102 L 100,102 L 118,234 Q 80,242 42,234 Z" fill="#FFFDF9" stroke="#E7E5E4" stroke-width="2"/><path d="M 45,100 Q 80,140 115,120 L 100,230 L 60,230 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-dasharray="2 2"/>` + // Lace details
-                    headAnimBride + `<path d="M 58,54 Q 80,30 102,54" fill="#1C1614"/><circle cx="80" cy="30" r="10" fill="#1C1614"/>` + // Low bun
+                    `<path d="M 60,102 L 100,102 L 118,234 Q 80,242 42,234 Z" fill="#FFFDF9" stroke="#E7E5E4" stroke-width="2"/><path d="M 45,100 Q 80,140 115,120 L 100,230 L 60,230 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-dasharray="2 2"/>` +
+                    headAnimBride + `<path d="M 58,54 Q 80,30 102,54" fill="#1C1614"/><circle cx="80" cy="30" r="10" fill="#1C1614"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="14" fill="#F43F5E"/>` + closeAnim;
             
             } else {
-                // Modern Luxury
                 cap.textContent = "Modern Luxury Elegance";
                 groomBox.innerHTML = baseGroomStart + 
-                    `<rect x="58" y="162" width="19" height="74" rx="4" fill="#09090B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#09090B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#09090B"/><polygon points="66,92 94,92 80,146" fill="#000"/><polygon points="75,98 85,98 80,104" fill="#FFF"/>` + // Tuxedo Black
+                    `<rect x="58" y="162" width="19" height="74" rx="4" fill="#09090B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#09090B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#09090B"/><polygon points="66,92 94,92 80,146" fill="#000"/><polygon points="75,98 85,98 80,104" fill="#FFF"/>` +
                     armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#09090B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
                     headAnimGroom + `<path d="M 56,46 Q 80,24 104,46 Q 90,34 56,46 Z" fill="#18181B"/>` + closeAnim;
                 
                 brideBox.innerHTML = baseBrideStart + 
-                    `<path d="M 64,102 L 96,102 L 105,180 Q 120,230 140,240 L 20,240 Q 40,230 55,180 Z" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="1"/>` + // Mermaid dress
+                    `<path d="M 64,102 L 96,102 L 105,180 Q 120,230 140,240 L 20,240 Q 40,230 55,180 Z" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="1"/>` +
                     headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#27272A"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="10" fill="#E4E4E7"/>` + closeAnim;
             }
