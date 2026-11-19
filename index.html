@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eternal Vows — Interactive Wedding Invitation</title>
+    <title>Eternal Vows AI — Interactive Wedding Invitation Platform</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -34,6 +34,21 @@
 
         .font-serif-luxury { font-family: 'Cormorant Garamond', serif; }
         .font-script { font-family: 'Great Vibes', cursive; }
+
+        /* Chat Animations */
+        @keyframes msgPop {
+            0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .chat-msg-anim { animation: msgPop 0.28s ease-out forwards; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-5px); opacity: 1; }
+        }
+        .typing-dot { animation: typingBounce 1.2s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
         /* Multi-part Character Animations */
         @keyframes groomBreathe { 0%, 100% { transform: translateY(0px) scaleY(1); } 50% { transform: translateY(-4px) scaleY(1.015); } }
@@ -68,7 +83,7 @@
         .envelope-overlay { transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), transform 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
         .envelope-overlay.opened { opacity: 0; transform: scale(1.12) translateY(-40px); pointer-events: none; }
         .ornate-frame { border: 1px solid var(--border-ornate); position: relative; }
-        
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
         ::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 9999px; }
@@ -82,126 +97,96 @@
     <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-20"></canvas>
 
     <!-- ==========================================
-         1. CREATOR SETUP / DETAIL COLLECTION (Shown first)
+         1. REAL AI CONVERSATIONAL CHAT STUDIO
          ========================================== -->
-    <div id="setup-screen" class="relative z-50 min-h-screen bg-stone-950 flex flex-col items-center py-10 px-4">
-        <div class="max-w-3xl w-full bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-10 shadow-2xl text-stone-200">
+    <div id="ai-chat-screen" class="relative z-50 min-h-screen bg-stone-950 flex flex-col items-center justify-center p-2 sm:p-5">
+        <div class="w-full max-w-3xl h-[94vh] sm:h-[88vh] bg-stone-900 border border-stone-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-stone-200">
             
-            <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-amber-600/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
-                    <i data-lucide="wand-2" class="w-8 h-8"></i>
-                </div>
-                <h1 class="font-serif-luxury text-4xl text-white mb-2">Create Your Wedding Invitation</h1>
-                <p class="text-sm text-stone-400">Fill in your details below. Once generated, you'll receive a secure custom link to send to your guests.</p>
-            </div>
-
-            <form id="creator-setup-form" class="space-y-8" onsubmit="handleCreateInvitation(event)">
-                
-                <!-- Couple & Parents -->
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
-                        <i data-lucide="users" class="w-5 h-5"></i> Names & Families
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Groom's Name</label>
-                            <input type="text" id="setup-groom" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Kasun">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Bride's Name</label>
-                            <input type="text" id="setup-bride" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Amaya">
-                        </div>
+            <!-- AI Studio Header -->
+            <div class="px-4 sm:px-5 py-3.5 bg-stone-950/90 border-b border-stone-800 flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-lg shadow-amber-600/20 shrink-0">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        <span id="ai-status-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-stone-950 rounded-full"></span>
                     </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Groom's Parents (Father & Mother)</label>
-                            <input type="text" id="setup-groom-parents" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Mr. & Mrs. Perera">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Bride's Parents (Father & Mother)</label>
-                            <input type="text" id="setup-bride-parents" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. Mr. & Mrs. Silva">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Event Details & Limits -->
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
-                        <i data-lucide="calendar-clock" class="w-5 h-5"></i> Event Details & Limits
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Wedding Date</label>
-                            <input type="date" id="setup-date" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Time (e.g. 09:45 AM)</label>
-                            <input type="text" id="setup-time" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1 text-amber-500">Max Visitors (0 = Unlimited)</label>
-                            <input type="number" id="setup-max-views" min="0" value="0" required class="w-full bg-stone-950 border border-amber-600/50 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white" title="The link will lock after this many people open it">
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Venue Name & Address</label>
-                        <input type="text" id="setup-venue" required class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="e.g. The Grand Ballroom, Shangri-La, Colombo 02">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Greeting / Display Message</label>
-                        <textarea id="setup-greeting" required rows="2" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none" placeholder="Invite you to share in the joy as they exchange vows and begin their new life together."></textarea>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="font-serif-luxury text-xl sm:text-2xl text-white font-bold tracking-wide leading-none">Eternal Vows AI</h1>
+                            <span id="ai-mode-badge" class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Real Gemini AI</span>
+                        </div>
+                        <p class="text-xs text-stone-400 mt-0.5">Ask anything or chat naturally to design your invitation</p>
                     </div>
                 </div>
 
-                <!-- Theme & Styling -->
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-amber-500 border-b border-stone-800 pb-2 flex items-center gap-2">
-                        <i data-lucide="palette" class="w-5 h-5"></i> Theme & Design
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Wedding Style</label>
-                            <select id="setup-style" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white">
-                                <option value="kandyan">1. Kandyan Traditional</option>
-                                <option value="western">2. Western Classic</option>
-                                <option value="tamil_hindu">3. Tamil Hindu</option>
-                                <option value="muslim">4. Muslim Nikkah</option>
-                                <option value="low_country">5. Low Country Traditional</option>
-                                <option value="modern_luxury">6. Modern Luxury</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Color Theme</label>
-                            <select id="setup-color" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white">
-                                <option value="royalGold">Royal Gold & Ivory</option>
-                                <option value="sageBlush">Sage Green & Pearl</option>
-                                <option value="burgundy">Burgundy & Rose</option>
-                                <option value="midnight">Midnight & Gold</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Background Music</label>
-                            <select id="setup-music" class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none text-white">
-                                <option value="harp">Gentle Harp Melody</option>
-                                <option value="flute">Traditional Flute Tune</option>
-                                <option value="piano">Romantic Piano</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" id="create-invite-btn" class="w-full py-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-lg shadow-xl shadow-amber-600/20 transition flex items-center justify-center gap-2">
-                        <i data-lucide="sparkles" class="w-5 h-5"></i> <span id="create-btn-text">Create The Invitation</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="openApiKeyModal()" id="connect-ai-btn"
+                            class="px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 hover:text-amber-300 transition flex items-center gap-1.5 text-xs font-semibold">
+                        <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+                        <span class="hidden sm:inline" id="connect-ai-label">Gemini Active</span>
+                    </button>
+                    <button onclick="restartAIChat()" title="Start Over"
+                            class="p-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-400 hover:text-white transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </button>
                 </div>
-            </form>
+            </div>
+
+            <!-- Live Progress & Blueprint Bar -->
+            <div class="px-4 sm:px-5 py-2.5 bg-stone-950/50 border-b border-stone-800/80 flex items-center justify-between gap-3 shrink-0">
+                <div class="flex-1 h-1.5 bg-stone-800 rounded-full overflow-hidden">
+                    <div id="ai-progress-bar" class="h-full bg-gradient-to-r from-amber-600 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                </div>
+                <span id="ai-progress-text" class="text-[11px] font-medium text-stone-400 whitespace-nowrap">0 / 12 details</span>
+                <button id="header-create-btn" onclick="launchCreatedInvitation()" class="hidden px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow transition flex items-center gap-1 whitespace-nowrap">
+                    <i data-lucide="sparkles" class="w-3 h-3"></i> Create Now
+                </button>
+            </div>
+
+            <!-- Chat Messages Feed -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
+                <!-- Messages injected dynamically -->
+            </div>
+
+            <!-- Contextual Quick Replies & Inline Date Picker -->
+            <div id="quick-replies" class="px-4 sm:px-6 pb-2 flex flex-wrap items-center gap-2 shrink-0 empty:hidden">
+                <!-- Interactive chips injected dynamically -->
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="p-3 sm:p-4 bg-stone-950/90 border-t border-stone-800 shrink-0">
+                <form id="chat-form" onsubmit="handleUserChatSubmit(event)" class="flex items-center gap-2">
+                    <input type="text" id="chat-text-input" autocomplete="off"
+                           class="flex-1 bg-stone-900 border border-stone-700 focus:border-amber-500 rounded-2xl px-4 py-3 text-sm text-white placeholder-stone-500 focus:outline-none transition"
+                           placeholder="Type your answer, edit a detail, or ask any question...">
+                    <button type="submit" id="chat-send-btn"
+                            class="w-12 h-12 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-600/20 transition active:scale-95 shrink-0">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini API Key Settings Modal (Allows updating key anytime) -->
+    <div id="api-key-modal" class="hidden fixed inset-0 z-[80] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-stone-900 border border-stone-700 rounded-3xl max-w-md w-full p-6 text-stone-200 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-serif-luxury text-2xl text-white font-bold flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-5 h-5 text-amber-400"></i> Gemini AI Settings
+                </h3>
+                <button onclick="closeApiKeyModal()" class="text-stone-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <p class="text-xs text-stone-400 leading-relaxed">
+                Real Gemini AI is pre-configured. You can update the API key below if you ever rotate or replace your key.
+            </p>
+            <div>
+                <label class="block text-xs font-semibold uppercase text-stone-400 mb-1">Gemini API Key</label>
+                <input type="password" id="gemini-api-key-input" placeholder="AQ... or AIzaSy..." class="w-full bg-stone-950 border border-stone-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none">
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-2">
+                <button type="button" onclick="resetDefaultGeminiKey()" class="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-xs font-semibold text-stone-300">Reset Default</button>
+                <button type="button" onclick="saveGeminiKey()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-white">Save Key</button>
+            </div>
         </div>
     </div>
 
@@ -222,11 +207,16 @@
          2. ADMIN SHARE BAR (Shown after creation)
          ========================================== -->
     <div id="admin-share-bar" class="hidden fixed top-0 left-0 right-0 z-[60] bg-emerald-950 border-b border-emerald-800 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
-        <div class="flex items-center gap-2 text-emerald-400">
-            <i data-lucide="check-circle" class="w-5 h-5"></i>
-            <span class="text-sm font-semibold">Invitation Created Successfully!</span>
+        <div class="flex items-center gap-3">
+            <button onclick="backToAIChat()" class="bg-emerald-900/70 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to AI Chat
+            </button>
+            <div class="flex items-center gap-1.5 text-emerald-400">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span class="text-xs sm:text-sm font-semibold">Invitation Ready!</span>
+            </div>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             <input type="text" id="shareable-link-input" readonly class="flex-1 sm:w-80 bg-emerald-900/50 border border-emerald-700 rounded-lg px-3 py-1.5 text-xs text-emerald-100 font-mono outline-none" value="Generating short link...">
             <button id="copy-btn" onclick="copyGeneratedLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 whitespace-nowrap">
                 <i data-lucide="copy" class="w-4 h-4"></i> Copy Link
@@ -237,7 +227,7 @@
     <!-- ==========================================
          3. AUDIO & REPLAY TOGGLES (Floating)
          ========================================== -->
-    <div id="floating-controls" class="hidden fixed top-20 sm:top-6 left-0 right-0 z-40 px-4 pointer-events-none flex justify-between items-center max-w-5xl mx-auto w-full">
+    <div id="floating-controls" class="hidden fixed top-20 sm:top-16 left-0 right-0 z-40 px-4 pointer-events-none flex justify-between items-center max-w-5xl mx-auto w-full">
         <div class="pointer-events-auto">
             <button onclick="resetEnvelope()" class="bg-black/60 hover:bg-black/80 text-white/90 backdrop-blur-md px-3.5 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 border border-white/15 shadow-lg transition">
                 <i data-lucide="mail" class="w-3.5 h-3.5 text-amber-400"></i> <span class="hidden sm:inline">Replay Envelope</span>
@@ -527,30 +517,82 @@
             <!-- Footer -->
             <footer class="py-6 px-6 text-center border-t text-xs opacity-65" style="border-color: var(--border-ornate); color: var(--text-secondary);">
                 <p id="footer-hashtag" class="font-serif-luxury italic text-base mb-1">#Wedding</p>
-                <p>Crafted with Love • Interactive Digital Wedding Invitation</p>
+                <p>Crafted with Love • Eternal Vows AI Invitation Platform</p>
             </footer>
         </div>
     </main>
 
     <!-- ==========================================
-         APPLICATION JAVASCRIPT
+         REAL AI ENGINE & APPLICATION JAVASCRIPT
          ========================================== -->
     <script>
-        // State
-        let config = {
-            groom: "", bride: "",
-            groomParents: "", brideParents: "",
-            date: "", timeText: "",
-            venue: "", greeting: "",
-            style: "kandyan", color: "royalGold", music: "harp",
-            maxViews: 0, uid: ""
-        };
-        
-        let currentAttendanceChoice = 'yes'; // RSVP State
+        // --- BUILT-IN GEMINI API KEY ---
+        const DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6Lu_jVTJJntrksyppGI1bsnPiodCVBJwk8FIRL2H4jYEg";
+        let geminiApiKey = localStorage.getItem('eternalvows_gemini_key') || DEFAULT_GEMINI_API_KEY;
+
+        // --- INVITATION DATA MODEL ---
+        function createEmptyConfig() {
+            return {
+                groom: "",
+                bride: "",
+                groomParents: "",
+                brideParents: "",
+                date: "",
+                timeText: "",
+                venue: "",
+                style: "",
+                color: "",
+                music: "",
+                greeting: "",
+                maxViews: null,
+                uid: ""
+            };
+        }
+
+        let config = createEmptyConfig();
+        let geminiHistory = [];
+        let isAITyping = false;
+
+        let currentAttendanceChoice = 'yes';
         let audioCtx = null;
         let isPlayingAudio = false;
         let melodyInterval = null;
         let noteIdx = 0;
+
+        const VALID_STYLES = ['kandyan', 'western', 'tamil_hindu', 'muslim', 'low_country', 'modern_luxury'];
+        const VALID_COLORS = ['royalGold', 'sageBlush', 'burgundy', 'midnight'];
+        const VALID_MUSIC  = ['harp', 'flute', 'piano'];
+
+        const styleLabels = {
+            kandyan: "Kandyan Traditional Wedding",
+            western: "Western Classic Wedding",
+            tamil_hindu: "Tamil Hindu Wedding",
+            muslim: "Muslim Nikkah Wedding",
+            low_country: "Low Country Traditional Wedding",
+            modern_luxury: "Modern Luxury Wedding"
+        };
+
+        const colorLabels = {
+            royalGold: "Royal Gold & Ivory",
+            sageBlush: "Sage Green & Pearl",
+            burgundy: "Burgundy & Rose",
+            midnight: "Midnight & Gold"
+        };
+
+        const musicLabels = {
+            harp: "Gentle Harp Melody",
+            flute: "Traditional Flute Tune",
+            piano: "Romantic Piano"
+        };
+
+        const aiGreetingTemplates = {
+            kandyan: "With the blessings of the Triple Gem and our beloved families, we warmly invite you to grace the Poruwa ceremony and celebrate the beginning of our forever.",
+            western: "Together with our families, we joyfully invite you to witness our vows and celebrate an unforgettable evening of love and laughter.",
+            tamil_hindu: "With the divine blessings of the Almighty and our elders, we cordially invite you to join us as we unite in sacred matrimony.",
+            muslim: "Bismillahir Rahmanir Raheem. With gratitude to Almighty Allah, we warmly invite you and your family to share in the joy of our Nikkah ceremony.",
+            low_country: "With heartfelt joy and the blessings of our parents, we warmly invite you to celebrate our traditional union and new journey together.",
+            modern_luxury: "Join us for an enchanting celebration of love as we exchange vows, raise a toast, and step into our next chapter together."
+        };
 
         const melodies = {
             harp: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 349.23, 440.00, 587.33],
@@ -565,7 +607,725 @@
             midnight: { bgPrimary: "#0F172A", bgCard: "#1E293B", textPrimary: "#F8FAFC", textSecondary: "#94A3B8", accentMain: "#D4AF37", accentSoft: "#334155", borderOrnate: "#475569", ambient: "radial-gradient(circle at 50% 20%, #1E3A8A 0%, #0F172A 50%, #020617 100%)" }
         };
 
-        // --- URL ENCODING FOR SHARE LINK (Readable Parameters) ---
+        // --- HELPERS ---
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+        }
+
+        function formatSimpleMarkdown(text) {
+            let safe = escapeHTML(text);
+            safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            safe = safe.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            safe = safe.replace(/\n/g, '<br>');
+            return safe;
+        }
+
+        function getMissingFields() {
+            const missing = [];
+            if (!config.groom) missing.push('groom');
+            if (!config.bride) missing.push('bride');
+            if (!config.groomParents) missing.push('groomParents');
+            if (!config.brideParents) missing.push('brideParents');
+            if (!config.date) missing.push('date');
+            if (!config.timeText) missing.push('timeText');
+            if (!config.venue) missing.push('venue');
+            if (!config.style) missing.push('style');
+            if (!config.color) missing.push('color');
+            if (!config.music) missing.push('music');
+            if (!config.greeting) missing.push('greeting');
+            if (config.maxViews === null) missing.push('maxViews');
+            return missing;
+        }
+
+        function updateProgressUI() {
+            const missing = getMissingFields();
+            const completed = 12 - missing.length;
+            const pct = Math.round((completed / 12) * 100);
+            document.getElementById('ai-progress-bar').style.width = `${pct}%`;
+            document.getElementById('ai-progress-text').textContent = completed === 12 ? "All 12 ready!" : `${completed} / 12 details`;
+
+            const createBtn = document.getElementById('header-create-btn');
+            if (completed === 12) createBtn.classList.remove('hidden');
+            else createBtn.classList.add('hidden');
+        }
+
+        function updateAIModeBadge() {
+            const badge = document.getElementById('ai-mode-badge');
+            const dot = document.getElementById('ai-status-dot');
+            const label = document.getElementById('connect-ai-label');
+
+            if (geminiApiKey) {
+                badge.textContent = "Real Gemini AI";
+                badge.className = "text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                dot.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-stone-950 rounded-full";
+                label.textContent = "Gemini Active";
+            } else {
+                badge.textContent = "Guided Mode";
+                badge.className = "text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                dot.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-400 border-2 border-stone-950 rounded-full";
+                label.textContent = "Set AI Key";
+            }
+        }
+
+        function openApiKeyModal() {
+            document.getElementById('gemini-api-key-input').value = geminiApiKey;
+            document.getElementById('api-key-modal').classList.remove('hidden');
+        }
+        function closeApiKeyModal() {
+            document.getElementById('api-key-modal').classList.add('hidden');
+        }
+        async function saveGeminiKey() {
+            const key = document.getElementById('gemini-api-key-input').value.trim();
+            geminiApiKey = key;
+            if (key) localStorage.setItem('eternalvows_gemini_key', key);
+            else localStorage.removeItem('eternalvows_gemini_key');
+            updateAIModeBadge();
+            closeApiKeyModal();
+            await appendAIMessage(`API key updated! <strong>Real Gemini AI</strong> is ready.`, getChipsForNextField(), 200);
+        }
+        async function resetDefaultGeminiKey() {
+            localStorage.removeItem('eternalvows_gemini_key');
+            geminiApiKey = DEFAULT_GEMINI_API_KEY;
+            updateAIModeBadge();
+            closeApiKeyModal();
+            await appendAIMessage(`Restored default <strong>Real Gemini AI</strong> key.`, getChipsForNextField(), 200);
+        }
+
+        // --- CHAT UI RENDERING ---
+        function scrollChatToBottom() {
+            const box = document.getElementById('chat-messages');
+            setTimeout(() => { box.scrollTop = box.scrollHeight; }, 60);
+        }
+
+        function appendUserMessage(text) {
+            const box = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = "flex justify-end chat-msg-anim";
+            div.innerHTML = `
+                <div class="max-w-[82%] bg-amber-600 text-white px-4 py-3 rounded-2xl rounded-br-sm text-sm shadow-md leading-relaxed">
+                    ${escapeHTML(text)}
+                </div>
+            `;
+            box.appendChild(div);
+            scrollChatToBottom();
+        }
+
+        function showTypingIndicator() {
+            const box = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.id = "ai-typing-bubble";
+            div.className = "flex items-start gap-2.5 chat-msg-anim";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div class="bg-stone-800 border border-stone-700/70 px-4 py-3.5 rounded-2xl rounded-bl-sm flex items-center gap-1.5">
+                    <span class="typing-dot w-2 h-2 bg-amber-400 rounded-full"></span>
+                    <span class="typing-dot w-2 h-2 bg-amber-400 rounded-full"></span>
+                    <span class="typing-dot w-2 h-2 bg-amber-400 rounded-full"></span>
+                </div>
+            `;
+            box.appendChild(div);
+            lucide.createIcons();
+            scrollChatToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const el = document.getElementById('ai-typing-bubble');
+            if (el) el.remove();
+        }
+
+        async function appendAIMessage(htmlContent, chips = [], delayMs = 350) {
+            if (delayMs > 0) {
+                showTypingIndicator();
+                await new Promise(r => setTimeout(r, delayMs));
+                removeTypingIndicator();
+            }
+
+            const box = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = "flex items-start gap-2.5 chat-msg-anim";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div class="max-w-[85%] bg-stone-800/90 border border-stone-700/80 text-stone-100 px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed shadow-md">
+                    ${htmlContent}
+                </div>
+            `;
+            box.appendChild(div);
+            lucide.createIcons();
+            setQuickReplies(chips);
+            scrollChatToBottom();
+            document.getElementById('chat-text-input').focus();
+        }
+
+        function setQuickReplies(chips) {
+            const container = document.getElementById('quick-replies');
+            container.innerHTML = "";
+
+            chips.forEach(chip => {
+                if (chip.type === 'date-picker') {
+                    const wrap = document.createElement('div');
+                    wrap.className = "flex items-center gap-1.5 bg-stone-800 border border-amber-500/40 rounded-full pl-3 pr-1.5 py-1";
+                    const nextMonth = new Date();
+                    nextMonth.setMonth(nextMonth.getMonth() + 1);
+                    const defaultVal = nextMonth.toISOString().split('T')[0];
+
+                    wrap.innerHTML = `
+                        <input type="date" id="inline-date-picker" value="${defaultVal}" class="bg-transparent text-xs text-white focus:outline-none">
+                        <button type="button" class="px-3 py-1 rounded-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold">Use Date</button>
+                    `;
+                    wrap.querySelector('button').onclick = () => {
+                        const val = wrap.querySelector('input').value;
+                        if (!val) return;
+                        const nice = new Date(val + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                        handleIncomingUserMessage(`The wedding date is ${val}`, nice);
+                    };
+                    container.appendChild(wrap);
+                    return;
+                }
+
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = chip.primary
+                    ? "px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition active:scale-95 flex items-center gap-1.5"
+                    : "px-3.5 py-1.5 rounded-full bg-stone-800 hover:bg-amber-600/20 hover:border-amber-500 border border-stone-700 text-stone-200 hover:text-amber-300 text-xs font-medium transition active:scale-95";
+                btn.innerHTML = chip.label;
+                btn.onclick = () => {
+                    if (chip.action) chip.action();
+                    else handleIncomingUserMessage(chip.value || chip.label, chip.displayLabel || chip.label);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function getChipsForNextField() {
+            const missing = getMissingFields();
+            if (missing.length === 0) {
+                return [
+                    { label: "✨ Create The Invitation", primary: true, action: launchCreatedInvitation },
+                    { label: "🔄 Start Over", action: restartAIChat }
+                ];
+            }
+            const next = missing[0];
+            if (next === 'date') return [{ type: 'date-picker' }];
+            if (next === 'timeText') {
+                return [
+                    { label: "09:00 AM Onwards", value: "09:00 AM Onwards" },
+                    { label: "09:45 AM (Poruwa)", value: "09:45 AM Onwards" },
+                    { label: "06:30 PM Evening", value: "06:30 PM Onwards" }
+                ];
+            }
+            if (next === 'style') {
+                return [
+                    { label: "👑 Kandyan Traditional", value: "Kandyan Traditional Wedding" },
+                    { label: "🎩 Western Classic", value: "Western Classic Wedding" },
+                    { label: "🪔 Tamil Hindu", value: "Tamil Hindu Wedding" },
+                    { label: "🌙 Muslim Nikkah", value: "Muslim Nikkah Wedding" },
+                    { label: "🌺 Low Country", value: "Low Country Traditional Wedding" },
+                    { label: "✨ Modern Luxury", value: "Modern Luxury Wedding" }
+                ];
+            }
+            if (next === 'color') {
+                return [
+                    { label: "🟡 Royal Gold & Ivory", value: "Royal Gold & Ivory" },
+                    { label: "🌿 Sage Green & Pearl", value: "Sage Green & Pearl" },
+                    { label: "🍷 Burgundy & Rose", value: "Burgundy & Rose" },
+                    { label: "🌌 Midnight & Gold", value: "Midnight & Gold" }
+                ];
+            }
+            if (next === 'music') {
+                return [
+                    { label: "🎵 Gentle Harp", value: "Gentle Harp Melody" },
+                    { label: "🪈 Traditional Flute", value: "Traditional Flute Tune" },
+                    { label: "🎹 Romantic Piano", value: "Romantic Piano" }
+                ];
+            }
+            if (next === 'greeting') {
+                return [
+                    { label: "✨ AI Write a Greeting for Me", value: "Please write a beautiful wedding greeting for us!" }
+                ];
+            }
+            if (next === 'maxViews') {
+                return [
+                    { label: "♾️ Unlimited", value: "Unlimited invitees (0)" },
+                    { label: "10 Invitees", value: "Limit to 10 invitees" },
+                    { label: "25 Invitees", value: "Limit to 25 invitees" },
+                    { label: "50 Invitees", value: "Limit to 50 invitees" }
+                ];
+            }
+            return [];
+        }
+
+        function buildSummaryBoxHTML() {
+            const dObj = new Date(config.date + 'T00:00:00');
+            const niceDate = isNaN(dObj) ? config.date : dObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const limitText = config.maxViews > 0 ? `${config.maxViews} unique viewers` : "Unlimited";
+
+            return `
+                <div class="mt-3 bg-stone-950/80 border border-amber-500/30 rounded-2xl p-3.5 text-xs space-y-1.5 text-stone-300">
+                    <div><span class="text-amber-400 font-semibold">Couple:</span> ${escapeHTML(config.groom)} &amp; ${escapeHTML(config.bride)}</div>
+                    <div><span class="text-amber-400 font-semibold">Parents:</span> ${escapeHTML(config.groomParents)} &amp; ${escapeHTML(config.brideParents)}</div>
+                    <div><span class="text-amber-400 font-semibold">Date &amp; Time:</span> ${escapeHTML(niceDate)} • ${escapeHTML(config.timeText)}</div>
+                    <div><span class="text-amber-400 font-semibold">Venue:</span> ${escapeHTML(config.venue)}</div>
+                    <div><span class="text-amber-400 font-semibold">Style:</span> ${styleLabels[config.style] || config.style}</div>
+                    <div><span class="text-amber-400 font-semibold">Theme &amp; Music:</span> ${colorLabels[config.color] || config.color} • ${musicLabels[config.music] || config.music}</div>
+                    <div><span class="text-amber-400 font-semibold">Visitor Limit:</span> ${limitText}</div>
+                    <div><span class="text-amber-400 font-semibold">Greeting:</span> <em>"${escapeHTML(config.greeting)}"</em></div>
+                </div>
+            `;
+        }
+
+        function applySafeUpdates(updates) {
+            if (!updates || typeof updates !== 'object') return;
+            const textFields = ['groom', 'bride', 'groomParents', 'brideParents', 'timeText', 'venue', 'greeting'];
+            textFields.forEach(k => {
+                if (typeof updates[k] === 'string' && updates[k].trim()) {
+                    config[k] = updates[k].trim();
+                }
+            });
+            if (typeof updates.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(updates.date.trim())) {
+                config.date = updates.date.trim();
+            }
+            if (typeof updates.style === 'string' && VALID_STYLES.includes(updates.style.trim())) {
+                config.style = updates.style.trim();
+            }
+            if (typeof updates.color === 'string' && VALID_COLORS.includes(updates.color.trim())) {
+                config.color = updates.color.trim();
+            }
+            if (typeof updates.music === 'string' && VALID_MUSIC.includes(updates.music.trim())) {
+                config.music = updates.music.trim();
+            }
+            if (updates.maxViews !== undefined && updates.maxViews !== null && updates.maxViews !== "") {
+                const n = parseInt(updates.maxViews, 10);
+                if (!isNaN(n) && n >= 0) config.maxViews = n;
+            }
+            updateProgressUI();
+        }
+
+        // --- REAL GEMINI AI ENGINE (Supports both AI Studio & Vertex Express AQ. Keys) ---
+        async function askRealGeminiAI(userText) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const systemPrompt = `You are Eternal Vows AI, a warm, intelligent, human-like wedding invitation designer for a Sri Lankan & modern digital wedding invitation platform.
+
+Today's date is ${todayStr}.
+
+YOUR DUAL ROLE:
+1. ACT LIKE A REAL AI: If the user asks ANY question (about wedding styles, Sri Lankan traditions, how this website works, visitor limits, RSVPs, or even a completely unrelated general knowledge question), answer it accurately, helpfully, and conversationally! NEVER save a question or off-topic sentence as a wedding detail.
+2. COLLECT & UPDATE INVITATION DETAILS: Naturally gather all 12 fields required to build the invitation. Users may provide 1 detail or several details at once, or ask to edit a previous detail at any time.
+
+CURRENT COLLECTED STATE:
+${JSON.stringify(config, null, 2)}
+
+MISSING FIELDS RIGHT NOW:
+${JSON.stringify(getMissingFields())}
+
+FIELD RULES (only include fields in "updates" when the user actually provided or asked to change them):
+- groom: Groom's name
+- bride: Bride's name
+- groomParents: Groom's father & mother names
+- brideParents: Bride's father & mother names
+- date: Must be converted to YYYY-MM-DD format (if user says "Dec 18 2026" -> "2026-12-18")
+- timeText: Ceremony start time (e.g., "09:45 AM Onwards")
+- venue: Wedding venue name & address
+- style: MUST be one of exact keys: "kandyan", "western", "tamil_hindu", "muslim", "low_country", "modern_luxury"
+- color: MUST be one of exact keys: "royalGold", "sageBlush", "burgundy", "midnight"
+- music: MUST be one of exact keys: "harp", "flute", "piano"
+- greeting: Heartfelt welcome message to show on the card. If the user asks you to write/suggest one, craft a poetic 1-sentence greeting tailored to their wedding style and put it directly into "updates.greeting"!
+- maxViews: Integer >= 0 (0 means Unlimited; e.g., "10 people" -> 10).
+
+OUTPUT FORMAT:
+Return ONLY valid JSON with this exact schema:
+{
+  "reply": "Your natural, helpful, concise response (answer their question if they asked one, acknowledge any details captured, and smoothly ask for the next missing detail—or confirm everything is ready to create!)",
+  "updates": {},
+  "trigger_create": false
+}
+Set "trigger_create": true ONLY if all 12 fields are filled AND the user explicitly asks to create/generate/preview the invitation now.`;
+
+            geminiHistory.push({ role: "user", parts: [{ text: userText }] });
+            if (geminiHistory.length > 24) {
+                geminiHistory = geminiHistory.slice(-24);
+                if (geminiHistory[0].role !== 'user') geminiHistory.shift();
+            }
+
+            const payload = {
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: geminiHistory,
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    temperature: 0.7
+                }
+            };
+
+            const endpoints = [
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+                `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(geminiApiKey)}`
+            ];
+
+            let response = null;
+            let lastErrorMsg = "";
+
+            for (const url of endpoints) {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    response = res;
+                    break;
+                }
+                const errJson = await res.json().catch(() => ({}));
+                lastErrorMsg = errJson?.error?.message || `HTTP ${res.status}`;
+                if (res.status !== 401 && res.status !== 403 && res.status !== 404) break;
+            }
+
+            if (!response) {
+                geminiHistory.pop();
+                throw new Error(lastErrorMsg || "API request failed");
+            }
+
+            const data = await response.json();
+            let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            rawText = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+
+            let parsed;
+            try {
+                parsed = JSON.parse(rawText);
+            } catch (e) {
+                parsed = { reply: rawText || "Got it!", updates: {}, trigger_create: false };
+            }
+
+            geminiHistory.push({ role: "model", parts: [{ text: JSON.stringify(parsed) }] });
+            return parsed;
+        }
+
+        // --- SMART QUESTION-GUARDED FALLBACK (If API Offline/Quota Reached) ---
+        function isLikelyQuestionOrOffTopic(text) {
+            const t = text.trim().toLowerCase();
+            if (t.endsWith('?')) return true;
+            if (/^(what|how|why|who|where|when|can you|could you|do you|tell me|explain|help|are you|is this|is there)\b/.test(t)) return true;
+            if (/^(hi|hello|hey|good morning|good evening|ayubowan|thanks|thank you|ok|okay)$/.test(t)) return true;
+            return false;
+        }
+
+        function parseStyleKeyword(text) {
+            const t = text.toLowerCase();
+            if (t.includes('kandyan')) return 'kandyan';
+            if (t.includes('western')) return 'western';
+            if (t.includes('tamil') || t.includes('hindu')) return 'tamil_hindu';
+            if (t.includes('muslim') || t.includes('nikkah') || t.includes('nikah')) return 'muslim';
+            if (t.includes('low') || t.includes('country')) return 'low_country';
+            if (t.includes('modern') || t.includes('luxury')) return 'modern_luxury';
+            return null;
+        }
+
+        function parseColorKeyword(text) {
+            const t = text.toLowerCase();
+            if (t.includes('midnight') || t.includes('dark') || t.includes('blue')) return 'midnight';
+            if (t.includes('royal') || t.includes('gold') || t.includes('ivory')) return 'royalGold';
+            if (t.includes('sage') || t.includes('green') || t.includes('pearl')) return 'sageBlush';
+            if (t.includes('burgundy') || t.includes('rose') || t.includes('red')) return 'burgundy';
+            return null;
+        }
+
+        function parseMusicKeyword(text) {
+            const t = text.toLowerCase();
+            if (t.includes('harp')) return 'harp';
+            if (t.includes('flute') || t.includes('traditional')) return 'flute';
+            if (t.includes('piano') || t.includes('romantic')) return 'piano';
+            return null;
+        }
+
+        function getPromptForField(field) {
+            const prompts = {
+                groom: `What are the **Groom's and Bride's names**? (e.g., Hiran & Hansi)`,
+                bride: `And what is the **Bride's name**?`,
+                groomParents: `What are **${config.groom}'s parents' names** (Father & Mother)?`,
+                brideParents: `What are **${config.bride}'s parents' names** (Father & Mother)?`,
+                date: `What is the **Wedding Date**? Pick a date below or type it (YYYY-MM-DD).`,
+                timeText: `What **time** does the ceremony start?`,
+                venue: `Where is the **Wedding Venue** (name & address)?`,
+                style: `Which of the **6 Wedding Styles** would you like for the animated couple?`,
+                color: `Choose a **Color Theme** for your invitation card:`,
+                music: `Which **Background Music** should play when guests open the envelope?`,
+                greeting: `Write a short **Greeting Message** for the card—or click below for me to write one!`,
+                maxViews: `**For how many invitees** should this link remain open? (Type a number like 10, or choose Unlimited)`
+            };
+            return prompts[field] || "Ready to create your invitation!";
+        }
+
+        function runBuiltInFallbackAI(text) {
+            const t = text.trim().toLowerCase();
+            const missing = getMissingFields();
+            const currentField = missing[0] || null;
+
+            const editMatch = text.match(/^(?:change|update|edit|set)\s+(groom|bride|venue|time|date|greeting|style|color|music|limit)\s+(?:to|as|:)\s+(.+)$/i);
+            if (editMatch) {
+                const fieldKey = editMatch[1].toLowerCase();
+                const newVal = editMatch[2].trim();
+                const updates = {};
+                if (fieldKey === 'groom') updates.groom = newVal;
+                else if (fieldKey === 'bride') updates.bride = newVal;
+                else if (fieldKey === 'venue') updates.venue = newVal;
+                else if (fieldKey === 'time') updates.timeText = newVal;
+                else if (fieldKey === 'date') updates.date = newVal;
+                else if (fieldKey === 'greeting') updates.greeting = newVal;
+                else if (fieldKey === 'style') updates.style = parseStyleKeyword(newVal);
+                else if (fieldKey === 'color') updates.color = parseColorKeyword(newVal);
+                else if (fieldKey === 'music') updates.music = parseMusicKeyword(newVal);
+                else if (fieldKey === 'limit') updates.maxViews = parseInt(newVal, 10) || 0;
+                applySafeUpdates(updates);
+                const nextMissing = getMissingFields();
+                return {
+                    reply: `Updated **${fieldKey}**! ` + (nextMissing.length ? getPromptForField(nextMissing[0]) : "Everything is ready—click **Create The Invitation** below!"),
+                    showSummary: nextMissing.length === 0
+                };
+            }
+
+            if (currentField === 'greeting' && (t.includes('write') || t.includes('suggest') || t.includes('ai'))) {
+                const chosen = aiGreetingTemplates[config.style] || aiGreetingTemplates.kandyan;
+                applySafeUpdates({ greeting: chosen });
+                const nextMissing = getMissingFields();
+                return {
+                    reply: `I crafted this greeting for you:\n*"${chosen}"*\n\n${nextMissing.length ? getPromptForField(nextMissing[0]) : "All details are complete!"}`,
+                    showSummary: nextMissing.length === 0
+                };
+            }
+
+            if (isLikelyQuestionOrOffTopic(text)) {
+                let answer = `I'm currently running in fallback Guided Mode (check your Gemini API key if you'd like live AI replies).`;
+                if (/^(hi|hello|hey|ayubowan|good morning|good evening)/.test(t)) {
+                    answer = `Hello! 👋 I'm here to help design your interactive wedding invitation.`;
+                } else if (t.includes('style') || t.includes('theme')) {
+                    answer = `We support **6 Wedding Styles** (Kandyan Traditional, Western Classic, Tamil Hindu, Muslim Nikkah, Low Country Traditional, and Modern Luxury) and **4 Color Palettes**.`;
+                } else if (t.includes('rsvp') || t.includes('excel') || t.includes('sheet') || t.includes('attend')) {
+                    answer = `Your final invitation includes an RSVP section automatically connected to your Google Sheet so you can download guest attendance in Excel.`;
+                } else if (t.includes('limit') || t.includes('how many') || t.includes('lock')) {
+                    answer = `You can set a visitor limit (like 10 people) so the link automatically locks once that many unique people open it.`;
+                }
+                const follow = currentField ? `\n\nWhenever you're ready: ${getPromptForField(currentField)}` : `\n\nAll your details are ready to create the invitation!`;
+                return { reply: answer + follow, showSummary: false };
+            }
+
+            if (!currentField) {
+                if (t.includes('create') || t.includes('yes') || t.includes('build')) {
+                    return { reply: "Creating your interactive invitation now! ✨", triggerCreate: true };
+                }
+                return {
+                    reply: `All 12 details are set! Click **Create The Invitation** below, or tell me something like *"change venue to Galle Face Hotel"* to edit a detail.`,
+                    showSummary: true
+                };
+            }
+
+            const updates = {};
+            if (currentField === 'groom') {
+                const parts = text.split(/\s*(?:&|and|,|\+|\/)\s*/i).filter(Boolean);
+                if (parts.length >= 2) {
+                    updates.groom = parts[0].trim();
+                    updates.bride = parts[1].trim();
+                } else {
+                    updates.groom = text.trim();
+                }
+            } else if (currentField === 'bride') {
+                updates.bride = text.trim();
+            } else if (currentField === 'groomParents') {
+                updates.groomParents = text.trim();
+            } else if (currentField === 'brideParents') {
+                updates.brideParents = text.trim();
+            } else if (currentField === 'date') {
+                const dateMatch = text.match(/\d{4}-\d{2}-\d{2}/);
+                if (dateMatch) {
+                    updates.date = dateMatch[0];
+                } else {
+                    const parsedDate = new Date(text);
+                    if (!isNaN(parsedDate)) {
+                        updates.date = parsedDate.toISOString().split('T')[0];
+                    } else {
+                        return { reply: `Please pick a date using the **date picker below** or type it like \`2026-12-18\`.`, showSummary: false };
+                    }
+                }
+            } else if (currentField === 'timeText') {
+                updates.timeText = text.trim();
+            } else if (currentField === 'venue') {
+                updates.venue = text.trim();
+            } else if (currentField === 'style') {
+                const s = parseStyleKeyword(text);
+                if (!s) return { reply: `Please choose one of our 6 styles from the buttons below.`, showSummary: false };
+                updates.style = s;
+            } else if (currentField === 'color') {
+                const c = parseColorKeyword(text);
+                if (!c) return { reply: `Please choose one of the 4 color themes below.`, showSummary: false };
+                updates.color = c;
+            } else if (currentField === 'music') {
+                const m = parseMusicKeyword(text);
+                if (!m) return { reply: `Please choose Harp, Flute, or Piano from the buttons below.`, showSummary: false };
+                updates.music = m;
+            } else if (currentField === 'greeting') {
+                updates.greeting = text.trim();
+            } else if (currentField === 'maxViews') {
+                if (t.includes('unlimit') || t.includes('no limit')) {
+                    updates.maxViews = 0;
+                } else {
+                    const num = text.match(/\d+/);
+                    if (!num) return { reply: `Please enter a number (like \`10\`) or click **Unlimited** below.`, showSummary: false };
+                    updates.maxViews = parseInt(num[0], 10);
+                }
+            }
+
+            applySafeUpdates(updates);
+            const remaining = getMissingFields();
+            if (remaining.length === 0) {
+                return {
+                    reply: `Perfect! ✨ I have all your details ready. Review the summary below and click **Create The Invitation** when you're ready!`,
+                    showSummary: true
+                };
+            }
+            return {
+                reply: `Got it! 👍 ${getPromptForField(remaining[0])}`,
+                showSummary: false
+            };
+        }
+
+        // --- UNIFIED MESSAGE DISPATCHER ---
+        function handleUserChatSubmit(e) {
+            e.preventDefault();
+            if (isAITyping) return;
+            const input = document.getElementById('chat-text-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = "";
+            handleIncomingUserMessage(text, text);
+        }
+
+        async function handleIncomingUserMessage(rawText, displayText) {
+            if (isAITyping) return;
+            isAITyping = true;
+            setQuickReplies([]);
+            appendUserMessage(displayText);
+
+            const missingBefore = getMissingFields().length;
+
+            if (geminiApiKey) {
+                showTypingIndicator();
+                try {
+                    const aiRes = await askRealGeminiAI(rawText);
+                    removeTypingIndicator();
+
+                    applySafeUpdates(aiRes.updates);
+                    const missingAfter = getMissingFields();
+                    let html = formatSimpleMarkdown(aiRes.reply || "Got it!");
+
+                    if (missingAfter.length === 0 && (missingBefore > 0 || (aiRes.updates && Object.keys(aiRes.updates).length > 0))) {
+                        html += buildSummaryBoxHTML();
+                    }
+
+                    await appendAIMessage(html, getChipsForNextField(), 0);
+
+                    if (aiRes.trigger_create && missingAfter.length === 0) {
+                        setTimeout(() => launchCreatedInvitation(), 700);
+                    }
+                    isAITyping = false;
+                    return;
+                } catch (err) {
+                    removeTypingIndicator();
+                    await appendAIMessage(
+                        `<span class="text-rose-300">Gemini API note (${escapeHTML(err.message)}).</span> Continuing in Guided Mode—click <strong>Gemini Active</strong> above if you need to update the key.`,
+                        [], 0
+                    );
+                }
+            }
+
+            const result = runBuiltInFallbackAI(rawText);
+            let html = formatSimpleMarkdown(result.reply);
+            if (result.showSummary && getMissingFields().length === 0) {
+                html += buildSummaryBoxHTML();
+            }
+            await appendAIMessage(html, getChipsForNextField(), 350);
+
+            if (result.triggerCreate && getMissingFields().length === 0) {
+                setTimeout(() => launchCreatedInvitation(), 600);
+            }
+            isAITyping = false;
+        }
+
+        async function startAIChat() {
+            document.getElementById('chat-messages').innerHTML = "";
+            geminiHistory = [];
+            updateProgressUI();
+
+            await appendAIMessage(
+                `Hello! 👋 I'm <strong>Eternal Vows AI</strong>, your personal wedding invitation designer. You can chat with me naturally, ask any question, or share multiple details at once.<br><br>To begin, what are the <strong>Groom's and Bride's names</strong>? <span class="text-stone-400">(e.g., Hiran &amp; Hansi)</span>`,
+                [], 300
+            );
+        }
+
+        function restartAIChat() {
+            config = createEmptyConfig();
+            startAIChat();
+        }
+
+        // --- CREATE INVITATION & AUTO-SHORTEN LINK ---
+        async function launchCreatedInvitation() {
+            if (!config.style) config.style = "kandyan";
+            if (!config.color) config.color = "royalGold";
+            if (!config.music) config.music = "harp";
+            if (config.maxViews === null) config.maxViews = 0;
+
+            config.uid = Math.random().toString(36).substring(2, 10);
+            applyConfigToUI();
+
+            document.getElementById('ai-chat-screen').classList.add('hidden');
+            document.getElementById('admin-share-bar').classList.remove('hidden');
+            document.getElementById('floating-controls').classList.remove('hidden');
+            document.getElementById('envelope-screen').classList.remove('hidden');
+            document.getElementById('envelope-screen').classList.remove('opened');
+            document.getElementById('invitation-wrapper').classList.add('hidden');
+
+            const input = document.getElementById('shareable-link-input');
+            const copyBtn = document.getElementById('copy-btn');
+
+            input.value = "Generating short link...";
+            copyBtn.disabled = true;
+            copyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const longUrl = buildReadableLink(config);
+            const safeGroom = (config.groom || "groom").replace(/[^a-zA-Z0-9]/g, '').substring(0, 10) || "groom";
+            const safeBride = (config.bride || "bride").replace(/[^a-zA-Z0-9]/g, '').substring(0, 10) || "bride";
+            const randomStr = Math.random().toString(36).substring(2, 6);
+            const alias = `${safeGroom}Weds${safeBride}-${randomStr}`.toLowerCase();
+
+            try {
+                let response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}&alias=${alias}`);
+                if (!response.ok) {
+                    response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+                }
+                if (response.ok) {
+                    input.value = await response.text();
+                } else {
+                    input.value = longUrl;
+                }
+            } catch (err) {
+                input.value = longUrl;
+            }
+
+            copyBtn.disabled = false;
+            copyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            lucide.createIcons();
+        }
+
+        function backToAIChat() {
+            toggleAudio(false);
+            document.getElementById('admin-share-bar').classList.add('hidden');
+            document.getElementById('floating-controls').classList.add('hidden');
+            document.getElementById('envelope-screen').classList.add('hidden');
+            document.getElementById('invitation-wrapper').classList.add('hidden');
+            document.getElementById('ai-chat-screen').classList.remove('hidden');
+        }
+
+        // --- URL ENCODING FOR SHARE LINK ---
         function buildReadableLink(c) {
             const params = new URLSearchParams();
             params.set('guest', '1');
@@ -577,39 +1337,33 @@
             params.set('time', c.timeText);
             params.set('venue', c.venue);
             params.set('msg', c.greeting);
-            params.set('style', c.style);
-            params.set('color', c.color);
-            params.set('music', c.music);
-            params.set('max', c.maxViews);
-            params.set('uid', c.uid); // Unique identifier for cloud hit counter
-            
+            params.set('style', c.style || 'kandyan');
+            params.set('color', c.color || 'royalGold');
+            params.set('music', c.music || 'harp');
+            params.set('max', c.maxViews || 0);
+            params.set('uid', c.uid);
+
             const baseUrl = window.location.href.split('?')[0];
             return `${baseUrl}?${params.toString()}`;
         }
 
         // --- VISITOR LIMIT CHECK (GUEST MODE) ---
         async function checkVisitorLimit() {
-            if (!config.uid || config.maxViews <= 0) return true; // Unlimited
+            if (!config.uid || !config.maxViews || config.maxViews <= 0) return true;
 
-            // 1. Check if this device has already consumed a view to prevent refresh-stealing
             const accessKey = 'ev_access_' + config.uid;
-            if (localStorage.getItem(accessKey)) return true; 
+            if (localStorage.getItem(accessKey)) return true;
 
-            // 2. Fetch remote counter
             try {
                 const res = await fetch(`https://api.counterapi.dev/v1/eternalvows/${config.uid}/up`);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.count > config.maxViews) {
-                        return false; // Limit exceeded
-                    }
+                    if (data.count > config.maxViews) return false;
                 }
             } catch (e) {
-                // Failsafe: if the public free API is blocked or offline, we allow access to not ruin the wedding!
-                console.warn("Counter API failed, allowing access gracefully.");
+                console.warn("Counter API unavailable, allowing access gracefully.");
             }
-            
-            // Mark device as registered for this invite
+
             localStorage.setItem(accessKey, 'true');
             return true;
         }
@@ -617,128 +1371,63 @@
         // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
+            updateAIModeBadge();
+
             const urlParams = new URLSearchParams(window.location.search);
             const isGuest = urlParams.get('guest') === '1';
 
             if (isGuest) {
-                // Immediately hide setup
-                document.getElementById('setup-screen').classList.add('hidden');
+                document.getElementById('ai-chat-screen').classList.add('hidden');
 
-                // Read parameters
-                config.groom = urlParams.get('groom') || "";
-                config.bride = urlParams.get('bride') || "";
-                config.groomParents = urlParams.get('gParents') || "";
-                config.brideParents = urlParams.get('bParents') || "";
-                config.date = urlParams.get('date') || "";
-                config.timeText = urlParams.get('time') || "";
-                config.venue = urlParams.get('venue') || "";
-                config.greeting = urlParams.get('msg') || "";
-                config.style = urlParams.get('style') || "kandyan";
-                config.color = urlParams.get('color') || "royalGold";
-                config.music = urlParams.get('music') || "harp";
-                config.maxViews = parseInt(urlParams.get('max')) || 0;
-                config.uid = urlParams.get('uid') || "";
+                if (urlParams.get('cfg')) {
+                    try {
+                        const loadedConfig = JSON.parse(decodeURIComponent(atob(urlParams.get('cfg'))));
+                        if (loadedConfig) config = { ...config, ...loadedConfig };
+                    } catch (e) {}
+                } else {
+                    config.groom = urlParams.get('groom') || "";
+                    config.bride = urlParams.get('bride') || "";
+                    config.groomParents = urlParams.get('gParents') || "";
+                    config.brideParents = urlParams.get('bParents') || "";
+                    config.date = urlParams.get('date') || "";
+                    config.timeText = urlParams.get('time') || "";
+                    config.venue = urlParams.get('venue') || "";
+                    config.greeting = urlParams.get('msg') || "";
+                    config.style = urlParams.get('style') || "kandyan";
+                    config.color = urlParams.get('color') || "royalGold";
+                    config.music = urlParams.get('music') || "harp";
+                    config.maxViews = parseInt(urlParams.get('max')) || 0;
+                    config.uid = urlParams.get('uid') || "";
+                }
 
-                // Wait and verify if guest is allowed inside limit
                 const allowed = await checkVisitorLimit();
-                
                 if (!allowed) {
                     document.getElementById('limit-screen').classList.remove('hidden');
-                    return; // Stop execution
+                    return;
                 }
-                
-                // Allowed! Show Envelope
+
                 document.getElementById('envelope-screen').classList.remove('hidden');
                 document.getElementById('floating-controls').classList.remove('hidden');
                 applyConfigToUI();
             } else {
-                // Admin Mode Default
-                document.getElementById('setup-date').value = new Date().toISOString().split('T')[0];
+                startAIChat();
             }
-            
+
             resizeCanvas();
             createParticles();
             animateParticles();
             setInterval(updateCountdown, 1000);
         });
 
-        // --- CREATE INVITATION & AUTO-SHORTEN (ADMIN LOGIC) ---
-        async function handleCreateInvitation(e) {
-            e.preventDefault();
-            
-            // Gather form data
-            config.groom = document.getElementById('setup-groom').value.trim();
-            config.bride = document.getElementById('setup-bride').value.trim();
-            config.groomParents = document.getElementById('setup-groom-parents').value.trim();
-            config.brideParents = document.getElementById('setup-bride-parents').value.trim();
-            config.date = document.getElementById('setup-date').value;
-            config.timeText = document.getElementById('setup-time').value.trim();
-            config.venue = document.getElementById('setup-venue').value.trim();
-            config.greeting = document.getElementById('setup-greeting').value.trim();
-            config.style = document.getElementById('setup-style').value;
-            config.color = document.getElementById('setup-color').value;
-            config.music = document.getElementById('setup-music').value;
-            config.maxViews = parseInt(document.getElementById('setup-max-views').value) || 0;
-            
-            // Generate a random unique ID for the hit counter
-            config.uid = Math.random().toString(36).substring(2, 10);
-
-            applyConfigToUI();
-
-            // Switch UI Views
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('admin-share-bar').classList.remove('hidden');
-            document.getElementById('floating-controls').classList.remove('hidden');
-            document.getElementById('envelope-screen').classList.remove('hidden');
-
-            const input = document.getElementById('shareable-link-input');
-            const copyBtn = document.getElementById('copy-btn');
-            
-            // Set loading state
-            input.value = "Generating short link...";
-            copyBtn.disabled = true;
-            copyBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            const longUrl = buildReadableLink(config);
-            
-            // Clean names to make a neat TinyURL alias: eg. KasunWedsAmaya-a1b2
-            const safeGroom = config.groom.replace(/[^a-zA-Z0-9]/g, '').substring(0, 10);
-            const safeBride = config.bride.replace(/[^a-zA-Z0-9]/g, '').substring(0, 10);
-            const randomStr = Math.random().toString(36).substring(2, 6); // 4 random chars to ensure uniqueness
-            const alias = `${safeGroom}Weds${safeBride}-${randomStr}`.toLowerCase();
-
-            try {
-                // Call TinyURL API with custom names alias
-                let response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}&alias=${alias}`);
-                
-                if (!response.ok) {
-                    // Fallback to standard short link if custom alias is taken/failed
-                    response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-                }
-                
-                if (response.ok) {
-                    input.value = await response.text();
-                } else {
-                    input.value = longUrl; // Safe fallback
-                }
-            } catch (err) {
-                input.value = longUrl; // Safe fallback if internet/API fails
-            }
-
-            // Re-enable copy button
-            copyBtn.disabled = false;
-            copyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-
         function copyGeneratedLink() {
             const input = document.getElementById('shareable-link-input');
             input.select();
             document.execCommand('copy');
-            
+
             const btn = document.getElementById('copy-btn');
             btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Copied!`;
             lucide.createIcons();
-            
+
             setTimeout(() => {
                 btn.innerHTML = `<i data-lucide="copy" class="w-4 h-4"></i> Copy Link`;
                 lucide.createIcons();
@@ -747,31 +1436,28 @@
 
         // --- APPLY DATA TO UI ---
         function applyConfigToUI() {
-            // Text Replacements
             document.getElementById('env-couple-names').textContent = `${config.groom} & ${config.bride}`;
-            document.getElementById('env-monogram').textContent = `${config.groom.charAt(0)}&${config.bride.charAt(0)}`;
-            
+            document.getElementById('env-monogram').textContent = `${(config.groom || 'G').charAt(0).toUpperCase()}&${(config.bride || 'B').charAt(0).toUpperCase()}`;
+
             document.getElementById('card-groom-name').textContent = config.groom;
             document.getElementById('card-bride-name').textContent = config.bride;
             document.getElementById('card-groom-parents').textContent = config.groomParents;
             document.getElementById('card-bride-parents').textContent = config.brideParents;
             document.getElementById('card-welcome-msg').textContent = config.greeting;
-            
+
             document.getElementById('stage-groom-label').textContent = config.groom;
             document.getElementById('stage-bride-label').textContent = config.bride;
-            
-            // Format Date
+
             const dObj = new Date(config.date + 'T00:00:00');
             const dateStr = isNaN(dObj) ? config.date : dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-            
-            document.getElementById('env-date').textContent = `${dateStr} • ${config.venue.split(',')[0]}`;
+
+            document.getElementById('env-date').textContent = `${dateStr} • ${(config.venue || '').split(',')[0]}`;
             document.getElementById('display-date-formatted').textContent = dateStr;
             document.getElementById('display-time-formatted').textContent = config.timeText;
             document.getElementById('display-venue-name').textContent = config.venue;
-            document.getElementById('footer-hashtag').textContent = `#${config.groom}Weds${config.bride}`;
+            document.getElementById('footer-hashtag').textContent = `#${(config.groom || '').replace(/\s+/g,'')}Weds${(config.bride || '').replace(/\s+/g,'')}`;
 
-            // Apply Theme Palette
-            const p = palettes[config.color];
+            const p = palettes[config.color] || palettes.royalGold;
             const root = document.documentElement;
             root.style.setProperty('--bg-primary', p.bgPrimary);
             root.style.setProperty('--bg-card', p.bgCard);
@@ -797,7 +1483,7 @@
         function resetEnvelope() {
             document.getElementById('envelope-screen').classList.remove('opened');
             document.getElementById('invitation-wrapper').classList.add('hidden');
-            toggleAudio(false); 
+            toggleAudio(false);
         }
 
         // --- R.S.V.P FORM LOGIC (LINKED TO GOOGLE SHEETS) ---
@@ -833,25 +1519,21 @@
 
         async function handleRSVPSubmit(e) {
             e.preventDefault();
-            
-            // Get form values
+
             const name = document.getElementById('rsvp-name').value.trim();
             const guests = currentAttendanceChoice === 'yes' ? document.getElementById('rsvp-guests').value : "0";
             const greeting = document.getElementById('rsvp-message').value.trim() || "-";
-            
+
             const submitBtn = document.getElementById('rsvp-submit-btn');
             const btnText = document.getElementById('rsvp-submit-text');
-            
-            // Save original button text and show loading state
+
             const originalText = btnText.textContent;
             btnText.textContent = "Sending...";
             submitBtn.disabled = true;
 
-            // GOOGLE APPS SCRIPT WEB APP URL
             const scriptURL = 'https://script.google.com/macros/s/AKfycby958tWrLe95YokgetluP9wryRsu9_ON6Oow0jxxOK5FnRwppuJsINVJ52TOXyeijq-/exec';
 
             try {
-                // Send the data securely to Google Sheet
                 await fetch(scriptURL, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -861,14 +1543,13 @@
                         greeting: greeting
                     }),
                     headers: {
-                        'Content-Type': 'text/plain;charset=utf-8', 
+                        'Content-Type': 'text/plain;charset=utf-8',
                     }
                 });
 
-                // Hide the form and show the success confirmation
                 document.getElementById('rsvp-form').classList.add('hidden');
                 document.getElementById('rsvp-confirmation').classList.remove('hidden');
-                
+
                 const summary = document.getElementById('confirm-summary');
                 if (currentAttendanceChoice === 'yes') {
                     summary.textContent = `Thank you, ${name}! We have recorded ${guests} guest(s) attending. ${config.groom} & ${config.bride} can't wait to see you!`;
@@ -887,8 +1568,6 @@
             document.getElementById('rsvp-form').reset();
             document.getElementById('rsvp-form').classList.remove('hidden');
             document.getElementById('rsvp-confirmation').classList.add('hidden');
-            
-            // Reset button state just in case
             document.getElementById('rsvp-submit-btn').disabled = false;
             document.getElementById('rsvp-submit-text').textContent = currentAttendanceChoice === 'yes' ? "Confirm Attendance" : "Send Wishes";
         }
@@ -900,7 +1579,7 @@
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = config.music === 'piano' ? 'triangle' : (config.music === 'flute' ? 'sine' : 'sine');
+                osc.type = config.music === 'piano' ? 'triangle' : 'sine';
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
                 gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
@@ -918,7 +1597,7 @@
             if (forceStart && isPlayingAudio) return;
             isPlayingAudio = forceStart ? true : !isPlayingAudio;
             const btn = document.getElementById('audio-toggle-btn');
-            
+
             if (isPlayingAudio) {
                 btn.innerHTML = `<i data-lucide="volume-2" class="w-3.5 h-3.5 text-amber-400"></i><span id="audio-label">Music On</span>`;
                 const track = melodies[config.music] || melodies.harp;
@@ -937,7 +1616,7 @@
 
         // --- CHARACTER ANIMATIONS & REACTIONS ---
         function triggerGroomSolo(e) {
-            if(e) e.stopPropagation();
+            if (e) e.stopPropagation();
             const box = document.getElementById('groom-svg-box');
             box.classList.remove('groom-solo-active'); void box.offsetWidth; box.classList.add('groom-solo-active');
             showBubble('groom-bubble', "Welcome! 🙏");
@@ -946,7 +1625,7 @@
         }
 
         function triggerBrideSolo(e) {
-            if(e) e.stopPropagation();
+            if (e) e.stopPropagation();
             const box = document.getElementById('bride-svg-box');
             box.classList.remove('bride-solo-active'); void box.offsetWidth; box.classList.add('bride-solo-active');
             showBubble('bride-bubble', "So happy you're here! 💐");
@@ -973,14 +1652,13 @@
             setTimeout(() => b.classList.add('opacity-0', '-translate-y-1'), 1800);
         }
 
-        // --- 6 WEDDING THEMES SVGs (Minimalist Vector Representations) ---
+        // --- 6 WEDDING THEMES SVGs ---
         function renderSVGCharacters() {
             const groomBox = document.getElementById('groom-svg-box');
             const brideBox = document.getElementById('bride-svg-box');
             const cap = document.getElementById('attire-caption');
-            const style = config.style;
+            const style = config.style || 'kandyan';
 
-            // Shared structural elements for animations
             const baseGroomStart = `<svg viewBox="0 0 160 250" class="w-full h-full max-w-[155px] drop-shadow-md overflow-visible"><ellipse cx="80" cy="240" rx="40" ry="6" fill="rgba(0,0,0,0.12)"/><g class="groom-body-anim">`;
             const baseBrideStart = `<svg viewBox="0 0 160 250" class="w-full h-full max-w-[155px] drop-shadow-md overflow-visible"><ellipse cx="80" cy="240" rx="44" ry="6" fill="rgba(0,0,0,0.12)"/><g class="bride-body-anim">`;
             const armAnimGroom = `<g class="groom-arm-anim">`;
@@ -991,72 +1669,72 @@
 
             if (style === 'kandyan') {
                 cap.textContent = "Kandyan Nilame & Osariya";
-                groomBox.innerHTML = baseGroomStart + 
-                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FFFDF9" stroke="#E2D1A7" stroke-width="1.5"/><path d="M 38,98 Q 50,86 80,86 Q 110,86 122,98 L 110,154 L 50,154 Z" fill="#9E1B32" stroke="#DF9F28" stroke-width="2.5"/><polygon points="52,146 108,146 98,164 62,164" fill="#DF9F28"/>` + 
-                    armAnimGroom + `<path d="M 114,102 Q 134,118 128,88" fill="none" stroke="#9E1B32" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="84" r="6.5" fill="#E5B89B"/>` + 
+                groomBox.innerHTML = baseGroomStart +
+                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FFFDF9" stroke="#E2D1A7" stroke-width="1.5"/><path d="M 38,98 Q 50,86 80,86 Q 110,86 122,98 L 110,154 L 50,154 Z" fill="#9E1B32" stroke="#DF9F28" stroke-width="2.5"/><polygon points="52,146 108,146 98,164 62,164" fill="#DF9F28"/>` +
+                    armAnimGroom + `<path d="M 114,102 Q 134,118 128,88" fill="none" stroke="#9E1B32" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="84" r="6.5" fill="#E5B89B"/>` +
                     headAnimGroom + `<path d="M 56,48 Q 80,30 104,48" fill="#1F1917"/><polygon points="44,36 80,19 116,36 102,43 58,43" fill="#DF9F28"/>` + closeAnim;
-                
-                brideBox.innerHTML = baseBrideStart + 
+
+                brideBox.innerHTML = baseBrideStart +
                     `<path d="M 54,148 L 106,148 L 114,234 L 46,234 Z" fill="#FFFDF7" stroke="#DF9F28" stroke-width="2"/><path d="M 54,98 L 88,98 L 104,190 L 66,170 Z" fill="#9E1B32" opacity="0.92"/>` +
                     headAnimBride + `<path d="M 58,58 Q 80,36 102,58" fill="#1C1614"/><path d="M 59,52 Q 80,60 101,52" fill="none" stroke="#DF9F28" stroke-width="2.5"/>` +
                     armAnimBride + `<path d="M 48,114 Q 36,134 58,142" fill="none" stroke="#E5B89B" stroke-width="8" stroke-linecap="round"/><circle cx="58" cy="142" r="15" fill="#FCE7F3"/><circle cx="52" cy="139" r="6" fill="#9E1B32"/>` + closeAnim;
-            
+
             } else if (style === 'western') {
                 cap.textContent = "Classic Western Elegance";
-                groomBox.innerHTML = baseGroomStart + 
-                    `<rect x="58" y="162" width="19" height="74" rx="4" fill="#1E293B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#1E293B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#0F172A"/><polygon points="66,92 94,92 80,136" fill="#FFFFFF"/><polygon points="72,96 88,104 88,96 72,104" fill="#333"/>` + 
-                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#0F172A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                groomBox.innerHTML = baseGroomStart +
+                    `<rect x="58" y="162" width="19" height="74" rx="4" fill="#1E293B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#1E293B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#0F172A"/><polygon points="66,92 94,92 80,136" fill="#FFFFFF"/><polygon points="72,96 88,104 88,96 72,104" fill="#333"/>` +
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#0F172A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` +
                     headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Q 90,34 56,46 Z" fill="#27272A"/>` + closeAnim;
-                
-                brideBox.innerHTML = baseBrideStart + 
+
+                brideBox.innerHTML = baseBrideStart +
                     `<path d="M 80,32 Q 132,65 134,190 Q 80,202 26,182 Q 30,65 80,32 Z" fill="#FFFFFF" opacity="0.6"/><path d="M 60,102 L 100,102 L 128,234 Q 80,244 32,234 Z" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>` +
                     headAnimBride + `<path d="M 58,54 Q 80,30 102,54" fill="#27272A"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="16" fill="#DCFCE7"/><circle cx="60" cy="141" r="7" fill="#F43F5E"/>` + closeAnim;
-            
+
             } else if (style === 'tamil_hindu') {
                 cap.textContent = "Tamil Hindu Wedding";
-                groomBox.innerHTML = baseGroomStart + 
-                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/><path d="M 46,94 Q 80,86 114,94 L 106,160 L 54,160 Z" fill="#FFFDF9" stroke="#E2D1A7"/><path d="M 60,94 L 80,140 L 100,94" fill="none" stroke="#F43F5E" stroke-width="6" stroke-dasharray="4 2"/>` + 
-                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#FFFDF9" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                groomBox.innerHTML = baseGroomStart +
+                    `<path d="M 52,150 L 108,150 L 116,232 L 44,232 Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/><path d="M 46,94 Q 80,86 114,94 L 106,160 L 54,160 Z" fill="#FFFDF9" stroke="#E2D1A7"/><path d="M 60,94 L 80,140 L 100,94" fill="none" stroke="#F43F5E" stroke-width="6" stroke-dasharray="4 2"/>` +
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#FFFDF9" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` +
                     headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><circle cx="80" cy="42" r="3" fill="#EF4444"/>` + closeAnim;
-                
-                brideBox.innerHTML = baseBrideStart + 
-                    `<path d="M 54,148 L 106,148 L 118,234 L 42,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="3"/><path d="M 50,110 Q 80,180 110,130 L 100,100 Z" fill="#FBBF24" opacity="0.9"/><path d="M 60,98 L 80,145 L 100,98" fill="none" stroke="#F43F5E" stroke-width="8" stroke-dasharray="5 3"/>` + 
+
+                brideBox.innerHTML = baseBrideStart +
+                    `<path d="M 54,148 L 106,148 L 118,234 L 42,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="3"/><path d="M 50,110 Q 80,180 110,130 L 100,100 Z" fill="#FBBF24" opacity="0.9"/><path d="M 60,98 L 80,145 L 100,98" fill="none" stroke="#F43F5E" stroke-width="8" stroke-dasharray="5 3"/>` +
                     headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#1C1614"/><circle cx="80" cy="46" r="3" fill="#EF4444"/><path d="M 80,30 L 80,42" stroke="#FBBF24" stroke-width="2"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="12" fill="#FBBF24"/>` + closeAnim;
-            
+
             } else if (style === 'muslim') {
                 cap.textContent = "Muslim Nikkah";
-                groomBox.innerHTML = baseGroomStart + 
-                    `<path d="M 52,160 L 108,160 L 112,232 L 48,232 Z" fill="#F8FAFC"/><path d="M 46,94 Q 80,86 114,94 L 106,180 L 54,180 Z" fill="#1E3A8A"/><line x1="80" y1="94" x2="80" y2="170" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4 6"/>` + 
-                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E3A8A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                groomBox.innerHTML = baseGroomStart +
+                    `<path d="M 52,160 L 108,160 L 112,232 L 48,232 Z" fill="#F8FAFC"/><path d="M 46,94 Q 80,86 114,94 L 106,180 L 54,180 Z" fill="#1E3A8A"/><line x1="80" y1="94" x2="80" y2="170" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4 6"/>` +
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E3A8A" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` +
                     headAnimGroom + `<path d="M 62,38 Q 80,24 98,38 Z" fill="#1E3A8A"/><path d="M 56,46 Q 80,38 104,46 Z" fill="#1F1917"/>` + closeAnim;
-                
-                brideBox.innerHTML = baseBrideStart + 
+
+                brideBox.innerHTML = baseBrideStart +
                     `<path d="M 54,148 L 106,148 L 120,234 L 40,234 Z" fill="#F43F5E" stroke="#FBBF24" stroke-width="2"/><path d="M 54,98 L 106,98 L 110,150 L 50,150 Z" fill="#F43F5E"/><path d="M 70,30 Q 110,40 100,120 Q 70,140 50,110 Z" fill="#FECDD3" opacity="0.9"/>` +
                     headAnimBride + `<circle cx="80" cy="60" r="22" fill="#E5B89B"/><path d="M 58,54 Q 80,36 102,54 Q 80,20 58,54" fill="#FECDD3"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#F43F5E" stroke-width="8" stroke-linecap="round"/><circle cx="66" cy="144" r="14" fill="#FBBF24"/>` + closeAnim;
-            
+
             } else if (style === 'low_country') {
                 cap.textContent = "Low Country Traditional";
-                groomBox.innerHTML = baseGroomStart + 
+                groomBox.innerHTML = baseGroomStart +
                     `<path d="M 52,150 L 108,150 L 112,232 L 48,232 Z" fill="#FFFFFF" stroke="#CBD5E1"/><path d="M 46,94 Q 80,86 114,94 L 106,154 L 54,154 Z" fill="#1E293B"/><polygon points="66,92 94,92 80,120" fill="#FFFFFF"/>` +
-                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E293B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#1E293B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` +
                     headAnimGroom + `<path d="M 56,46 Q 80,20 104,46 Z" fill="#1F1917"/><path d="M 70,30 Q 80,10 90,30" fill="none" stroke="#FBBF24" stroke-width="3"/>` + closeAnim;
-                
-                brideBox.innerHTML = baseBrideStart + 
+
+                brideBox.innerHTML = baseBrideStart +
                     `<path d="M 60,102 L 100,102 L 118,234 Q 80,242 42,234 Z" fill="#FFFDF9" stroke="#E7E5E4" stroke-width="2"/><path d="M 45,100 Q 80,140 115,120 L 100,230 L 60,230 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-dasharray="2 2"/>` +
                     headAnimBride + `<path d="M 58,54 Q 80,30 102,54" fill="#1C1614"/><circle cx="80" cy="30" r="10" fill="#1C1614"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="14" fill="#F43F5E"/>` + closeAnim;
-            
+
             } else {
                 cap.textContent = "Modern Luxury Elegance";
-                groomBox.innerHTML = baseGroomStart + 
+                groomBox.innerHTML = baseGroomStart +
                     `<rect x="58" y="162" width="19" height="74" rx="4" fill="#09090B"/><rect x="83" y="162" width="19" height="74" rx="4" fill="#09090B"/><path d="M 46,94 Q 80,86 114,94 L 106,168 L 54,168 Z" fill="#09090B"/><polygon points="66,92 94,92 80,146" fill="#000"/><polygon points="75,98 85,98 80,104" fill="#FFF"/>` +
-                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#09090B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` + 
+                    armAnimGroom + `<path d="M 112,100 Q 134,114 128,84" fill="none" stroke="#09090B" stroke-width="13" stroke-linecap="round"/><circle cx="128" cy="80" r="6.5" fill="#E5B89B"/>` +
                     headAnimGroom + `<path d="M 56,46 Q 80,24 104,46 Q 90,34 56,46 Z" fill="#18181B"/>` + closeAnim;
-                
-                brideBox.innerHTML = baseBrideStart + 
+
+                brideBox.innerHTML = baseBrideStart +
                     `<path d="M 64,102 L 96,102 L 105,180 Q 120,230 140,240 L 20,240 Q 40,230 55,180 Z" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="1"/>` +
                     headAnimBride + `<path d="M 58,54 Q 80,25 102,54" fill="#27272A"/>` +
                     armAnimBride + `<path d="M 58,108 Q 44,130 64,142" fill="none" stroke="#E5B89B" stroke-width="7.5" stroke-linecap="round"/><circle cx="66" cy="144" r="10" fill="#E4E4E7"/>` + closeAnim;
@@ -1112,7 +1790,7 @@
         window.addEventListener('resize', resizeCanvas);
 
         function updateCountdown() {
-            if(!config.date) return;
+            if (!config.date) return;
             const target = new Date(config.date + "T09:45:00").getTime();
             const diff = Math.max(0, target - Date.now());
             document.getElementById('cd-days').textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
